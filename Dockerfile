@@ -10,15 +10,33 @@ RUN apt-get update && apt-get install -y git
 # Need sudo and lsb-release for the installation prerequisites
 RUN apt-get install -y sudo lsb-release tzdata bc
 
+# Install the SSH private key for cloning repo
+ARG SSH_PRIVATE_KEY
+
+# Authorize SSH host with Gitlab
+RUN mkdir -p /root/.ssh && \
+    chmod 0700 /root/.ssh && \
+    ssh-keyscan gitlab.com > /root/.ssh/known_hosts
+
+# Add in the SSH keys and set permissions
+RUN echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_rsa && \
+    chmod 600 /root/.ssh/id_rsa && \
+    ssh-keygen -y -f /root/.ssh/id_rsa > /root/.ssh/id_rsa.pub && \
+    chmod 600 /root/.ssh/id_rsa.pub
+
+# The ARDUPILOT repo and ref to use for the build
+ENV ARDUPILOT_REPO=https://github.com/ArduPilot/ardupilot.git
+ENV ARDUPILOT_REF=Copter-3.6.3
+
 # Now grab ArduPilot from GitHub
-RUN git clone https://github.com/ArduPilot/ardupilot.git ardupilot
+RUN git clone $ARDUPILOT_REPO ardupilot
 RUN cp -r ardupilot copter
 
 # Build the COPTER
 WORKDIR /copter
 
 # Checkout the latest Copter
-RUN git checkout Copter-3.6.3
+RUN git checkout $ARDUPILOT_REF
 
 # Now start build instructions from http://ardupilot.org/dev/docs/setting-up-sitl-on-linux.html
 RUN git submodule update --init --recursive

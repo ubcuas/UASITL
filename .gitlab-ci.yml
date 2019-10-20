@@ -11,11 +11,20 @@ variables:
   GIT_STRATEGY: fetch
   GIT_SUBMODULE_STRATEGY: recursive
 
-Build & Deploy:
+Build & Deploy Classic:
   stage: deploy
   tags:
     - docker
   script:
     - docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
-    - docker build --tag ubcuas/uasitl:latest .
+    - docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:latest .
     - docker push ubcuas/uasitl:latest
+
+Build & Deploy Accupilot:
+  stage: deploy
+  tags:
+    - docker
+  script:
+    - docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
+    - ARDUPILOT_REPO=git@gitlab.com:ubcuas/accupilot.git docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:accupilot .
+    - docker push ubcuas/uasitl:accupilot
