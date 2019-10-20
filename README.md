@@ -28,7 +28,7 @@ If you'd rather build the docker image yourself:
 
 To run the image:
 
-`docker run --rm -p 5760-5810:5760-5810 --env NUMCOPTERS=3 uasitl`
+`docker run --rm -p 5760-5810:5760-5810 --env NUMCOPTERS=3 -it uasitl`
 
 This will start 3 ArduCopter SITLs on host TCP ports 5760, 5770 and 5780 so to connect to it from the host, you could:
 
