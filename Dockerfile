@@ -13,12 +13,13 @@ RUN apt-get install -y sudo lsb-release tzdata bc
 # Install the SSH private key for cloning repo
 ARG SSH_PRIVATE_KEY
 
-# Authorize SSH host with Gitlab
+# Authorize SSH host with Gitlab & Github
 RUN mkdir -p /root/.ssh && \
     chmod 0700 /root/.ssh && \
-    ssh-keyscan gitlab.com > /root/.ssh/known_hosts
+    ssh-keyscan gitlab.com >> /root/.ssh/known_hosts \
+    ssh-keyscan github.com >> /root/.ssh/known_hosts
 
-# Add in the SSH keys and set permissions
+# Add in the SSH key and set permissions
 RUN echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_rsa && \
     chmod 600 /root/.ssh/id_rsa && \
     ssh-keygen -y -f /root/.ssh/id_rsa > /root/.ssh/id_rsa.pub && \
@@ -26,7 +27,7 @@ RUN echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_rsa && \
 
 # The ARDUPILOT repo and ref to use for the build
 ENV ARDUPILOT_REPO=https://github.com/ArduPilot/ardupilot.git
-ENV ARDUPILOT_REF=Copter-3.6.3
+ENV ARDUPILOT_REF=Copter-3.6.11
 
 # Now grab ArduPilot from GitHub
 RUN git clone $ARDUPILOT_REPO ardupilot
@@ -54,6 +55,9 @@ RUN cp build/sitl/bin/arducopter /
 
 COPY copter.parm /copter/Tools/autotest/default_params/copter.parm
 
+# Clean up SSH keys so they aren't easily accessible
+RUN rm -rf /root/.ssh
+
 # TCP 5760 is what the sim exposes by default, each INSTANCE increments by 10
 EXPOSE 5760-7760
 
@@ -67,9 +71,6 @@ ENV COPTERMODEL +
 ENV SPEEDUP 1
 ENV VEHICLE arducopter
 ENV NUMCOPTERS 0
-ENV NUMROVERS 0
-ENV NUMSUBS 0
-ENV NUMPLANES 0
 ENV INCREMENTSTEPLAT 0.01
 ENV INCREMENTSTEPLON 0.01
 

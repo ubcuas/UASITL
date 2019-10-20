@@ -37,6 +37,7 @@ if [ $numCopters != 0 ]; then
 
            export SITL_RITW_TERMINAL="screen -D -m -S Copter${INSTANCE}"
 
+           rm -rf /${VEHICLE}${INSTANCE}
            mkdir /${VEHICLE}${INSTANCE} && cd /${VEHICLE}${INSTANCE}
 
            simCommand="/copter/Tools/autotest/sim_vehicle.py \
@@ -63,7 +64,6 @@ if [ $numCopters != 0 ]; then
 
            # This shouldn't be necessary, but let's give it some time to spin-up
            sleep 3
-
     done
 fi
 
