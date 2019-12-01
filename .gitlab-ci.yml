@@ -20,6 +20,16 @@ Build & Deploy Classic:
     - docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:latest .
     - docker push ubcuas/uasitl:latest
 
+Build & Deploy Classic ARM:
+  stage: deploy
+  tags:
+    - ubcuas
+    - arm
+  script:
+    - docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
+    - docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:arm .
+    - docker push ubcuas/uasitl:latest
+
 Build & Deploy Accupilot:
   stage: deploy
   tags:
