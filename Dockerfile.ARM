@@ -44,6 +44,9 @@ RUN git checkout $ARDUPILOT_REF
 # Now start build instructions from http://ardupilot.org/dev/docs/setting-up-sitl-on-linux.html
 RUN git submodule update --init --recursive
 
+# Clean the ARM stuff out, since we are already on ARM
+RUN sed -i '12d' Tools/scripts/install-prereqs-ubuntu.sh
+
 # Need USER set so usermod does not fail...
 # Install all prerequisites now
 RUN USER=nobody Tools/scripts/install-prereqs-ubuntu.sh -y
