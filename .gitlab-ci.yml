@@ -28,7 +28,7 @@ Build & Deploy Classic ARM:
   script:
     - docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
     - docker build -f Dockerfile.ARM --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:arm .
-    - docker push ubcuas/uasitl:latest
+    - docker push ubcuas/uasitl:arm
 
 Build & Deploy Accupilot:
   stage: deploy
