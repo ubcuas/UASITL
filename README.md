@@ -16,7 +16,7 @@ To download it, simply:
 
 and to run it:
 
-`docker run --rm -p 5760-5780:5760-5780 --env NUMCOPTERS=3 ubcuas/uasitl`
+`docker run --rm -p 5760-5780:5760-5780 --env NUMCOPTERS=3 -it ubcuas/uasitl`
 
 
 Quick Start
