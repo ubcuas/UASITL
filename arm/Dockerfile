@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y git
 RUN apt-get install -y sudo lsb-release tzdata bc
 
 # The ARDUPILOT repo and ref to use for the build
+# NOTE: If you change this please update the SED command
 ENV ARDUPILOT_REPO=https://github.com/ArduPilot/ardupilot.git
 ENV ARDUPILOT_REF=Copter-4.0.3
 
@@ -30,11 +31,11 @@ RUN git checkout $ARDUPILOT_REF
 RUN git submodule update --init --recursive
 
 # Clean the ARM stuff out, since we are already on ARM
-RUN sed -i '12d' Tools/scripts/install-prereqs-ubuntu.sh
+RUN sed -i '34d' Tools/environment_install/install-prereqs-ubuntu.sh
 
 # Need USER set so usermod does not fail...
 # Install all prerequisites now
-RUN USER=nobody Tools/scripts/install-prereqs-ubuntu.sh -y
+RUN USER=nobody  Tools/environment_install/install-prereqs-ubuntu.sh -y
 
 # Continue build instructions from https://github.com/ArduPilot/ardupilot/blob/master/BUILD.md
 RUN ./waf distclean
