@@ -3,6 +3,7 @@ Multi-Agent ArduPilot Software-in-the-Loop Simulator Docker Container
 
 The purpose of this is to run /many/ ArduPilot SITL from within Docker.
 
+
 DockerHub
 ---------
 
@@ -16,7 +17,9 @@ To download it, simply:
 
 and to run it:
 
-`docker run --rm -p 5760-5780:5760-5780 --env NUMCOPTERS=3 ubcuas/uasitl`
+`docker run --rm -p 5760-5780:5760-5780 -it ubcuas/uasitl:latest`
+
+This will start 1 ArduCopter SITLs on host TCP ports 5760.
 
 
 Quick Start
@@ -24,7 +27,10 @@ Quick Start
 
 If you'd rather build the docker image yourself:
 
-`docker build --tag uasitl .`
+```
+./configure.sh
+docker build --build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa)" --tag uasitl x86
+```
 
 To run the image:
 
@@ -38,6 +44,8 @@ mavproxy.py --master=tcp:localhost:5770
 mavproxy.py --master=tcp:localhost:5780
 ```
 
+**WARNING: This bakes your private SSH key into the docker image, do NOT share this image with others.**
+
 Options
 -------
 
@@ -50,14 +58,8 @@ LON               -71.1476
 ALT               14
 DIR               270
 COPTERMODEL       +
-ROVERMODEL        +
-SUBMODEL          +
-PLANEMODEL        +
 SPEEDUP           1
-NUMCOPTERS        0
-NUMROVERS         0
-NUMSUBS           0
-NUMPLANES         0
+NUMCOPTERS        1
 INCREMENTSTEPLAT  0.01
 INCREMENTSTEPLON  0.01
 ```

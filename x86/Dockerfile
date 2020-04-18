@@ -1,3 +1,5 @@
+# UBC UAS SITL (x86)
+
 FROM ubuntu:latest
 LABEL maintainer Eric Mikulin
 
@@ -27,7 +29,7 @@ RUN echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_rsa && \
 
 # The ARDUPILOT repo and ref to use for the build
 ENV ARDUPILOT_REPO=https://github.com/ArduPilot/ardupilot.git
-ENV ARDUPILOT_REF=Copter-3.6.11
+ENV ARDUPILOT_REF=Copter-4.0.3
 
 # Now grab ArduPilot from GitHub
 RUN git clone $ARDUPILOT_REPO ardupilot
@@ -44,7 +46,7 @@ RUN git submodule update --init --recursive
 
 # Need USER set so usermod does not fail...
 # Install all prerequisites now
-RUN USER=nobody Tools/scripts/install-prereqs-ubuntu.sh -y
+RUN USER=nobody Tools/environment_install/install-prereqs-ubuntu.sh -y
 
 # Continue build instructions from https://github.com/ArduPilot/ardupilot/blob/master/BUILD.md
 RUN ./waf distclean
@@ -63,14 +65,14 @@ EXPOSE 5760-7760
 
 # Variables for simulator
 ENV INSTANCE 0
-ENV LAT 42.3898
-ENV LON -71.1476
+ENV LAT 38.144715
+ENV LON -76.427956
 ENV ALT 14
 ENV DIR 270
 ENV COPTERMODEL +
 ENV SPEEDUP 1
 ENV VEHICLE arducopter
-ENV NUMCOPTERS 0
+ENV NUMCOPTERS 1
 ENV INCREMENTSTEPLAT 0.01
 ENV INCREMENTSTEPLON 0.01
 
