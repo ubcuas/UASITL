@@ -14,7 +14,7 @@ RUN apt-get install -y sudo lsb-release tzdata bc
 
 # The ARDUPILOT repo and ref to use for the build
 ENV ARDUPILOT_REPO=https://github.com/ArduPilot/ardupilot.git
-ENV ARDUPILOT_REF=Copter-3.6.11
+ENV ARDUPILOT_REF=Copter-4.0.3
 
 # Now grab ArduPilot from GitHub
 RUN git clone $ARDUPILOT_REPO ardupilot

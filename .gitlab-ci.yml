@@ -17,7 +17,8 @@ Build & Deploy Classic:
     - docker
   script:
     - docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
-    - docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:latest .
+    - configure.sh
+    - docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:latest x86/
     - docker push ubcuas/uasitl:latest
 
 Build & Deploy Classic ARM:
@@ -27,7 +28,8 @@ Build & Deploy Classic ARM:
     - arm
   script:
     - docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
-    - docker build -f Dockerfile.ARM --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:arm .
+    - configure.sh
+    - docker build -f Dockerfile.ARM --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:arm arm/
     - docker push ubcuas/uasitl:arm
 
 Build & Deploy Accupilot:
@@ -36,5 +38,6 @@ Build & Deploy Accupilot:
     - docker
   script:
     - docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
-    - ARDUPILOT_REPO=git@gitlab.com:ubcuas/accupilot.git docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:accupilot .
+    - configure.sh
+    - ARDUPILOT_REPO=git@gitlab.com:ubcuas/accupilot.git docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:accupilot x86/
     - docker push ubcuas/uasitl:accupilot
