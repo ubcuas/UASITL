@@ -16,13 +16,16 @@ docker pull ubcuas/uasitl:latest
 ```
 The image can also be built locally:
 ```
-docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:latest x86/
+./configure.sh
+docker build --tag ubcuas/uasitl:latest x86/
 ```
 The image can be built using a custom `Ardupilot` repository:
 ```
+./configure.sh
 ARDUPILOT_REPO=git@gitlab.com:ubcuas/accupilot.git docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:accupilot x86/
 ```
-Please note the bash variable `$SSH_PRIVATE_KEY` needs to be a valid ssh private key. `ARDUPILOT_REPO` is an ssh git url to an ardupilot repository.
+Please note the bash variable `$SSH_PRIVATE_KEY` needs to be a valid ssh private key. If you are building on command line you can do this in one shot like so: `--build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa)"`.
+`ARDUPILOT_REPO` is an ssh git url to an ardupilot repository.
 **WARNING: Building locally bakes your private SSH key into the docker image, do NOT share this image with others.**
 
 ## Usage

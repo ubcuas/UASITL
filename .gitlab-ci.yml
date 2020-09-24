@@ -18,7 +18,7 @@ Build & Deploy Classic:
   script:
     - docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
     - ./configure.sh
-    - docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:latest x86/
+    - docker build --tag ubcuas/uasitl:latest x86/
     - docker push ubcuas/uasitl:latest
 
 # Build & Deploy Classic ARM:
