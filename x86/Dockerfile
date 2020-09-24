@@ -1,7 +1,6 @@
 # UBC UAS SITL (x86)
 
-FROM ubuntu:latest
-LABEL maintainer Eric Mikulin
+FROM ubuntu:bionic
 
 # Trick to get apt-get to not prompt for timezone in tzdata
 ENV DEBIAN_FRONTEND=noninteractive
@@ -16,20 +15,26 @@ RUN apt-get install -y sudo lsb-release tzdata bc
 ARG SSH_PRIVATE_KEY
 
 # Authorize SSH host with Gitlab & Github
-RUN mkdir -p /root/.ssh && \
-    chmod 0700 /root/.ssh && \
-    ssh-keyscan gitlab.com >> /root/.ssh/known_hosts \
-    ssh-keyscan github.com >> /root/.ssh/known_hosts
+RUN [ -z "$SSH_PRIVATE_KEY" ] || \
+    ( \
+        mkdir -p /root/.ssh && \
+        chmod 0700 /root/.ssh && \
+        ssh-keyscan gitlab.com >> /root/.ssh/known_hosts \
+        ssh-keyscan github.com >> /root/.ssh/known_hosts \
+    )
 
 # Add in the SSH key and set permissions
-RUN echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_rsa && \
-    chmod 600 /root/.ssh/id_rsa && \
-    ssh-keygen -y -f /root/.ssh/id_rsa > /root/.ssh/id_rsa.pub && \
-    chmod 600 /root/.ssh/id_rsa.pub
+RUN [ -z "$SSH_PRIVATE_KEY" ] || \
+    ( \
+        echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_rsa && \
+        chmod 600 /root/.ssh/id_rsa && \
+        ssh-keygen -y -f /root/.ssh/id_rsa > /root/.ssh/id_rsa.pub && \
+        chmod 600 /root/.ssh/id_rsa.pub \
+    )
 
 # The ARDUPILOT repo and ref to use for the build
 ENV ARDUPILOT_REPO=https://github.com/ArduPilot/ardupilot.git
-ENV ARDUPILOT_REF=Copter-4.0.3
+ENV ARDUPILOT_REF=Copter-4.0.4
 
 # Now grab ArduPilot from GitHub
 RUN git clone $ARDUPILOT_REPO ardupilot
