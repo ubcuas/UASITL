@@ -1,15 +1,10 @@
 # UBC UAS SITL (x86)
-
-FROM ubuntu:bionic
-
-# Trick to get apt-get to not prompt for timezone in tzdata
-ENV DEBIAN_FRONTEND=noninteractive
+## SITL BUILD IMAGE ##
+# Run the downloader in a pre-image so SSH keys are dropped from the image
+FROM ubuntu:bionic as SITLDOWLOADER
 
 # Need Git to checkout our sources
 RUN apt-get update && apt-get install -y git
-
-# Need sudo and lsb-release for the installation prerequisites
-RUN apt-get install -y sudo lsb-release tzdata bc
 
 # Install the SSH private key for cloning repo
 ARG SSH_PRIVATE_KEY
@@ -38,16 +33,27 @@ ENV ARDUPILOT_REF=Copter-4.0.4
 
 # Now grab ArduPilot from GitHub
 RUN git clone $ARDUPILOT_REPO ardupilot
-RUN cp -r ardupilot copter
-
-# Build the COPTER
-WORKDIR /copter
+WORKDIR /ardupilot
 
 # Checkout the latest Copter
 RUN git checkout $ARDUPILOT_REF
 
-# Now start build instructions from http://ardupilot.org/dev/docs/setting-up-sitl-on-linux.html
+# Pull submodule dependencies
 RUN git submodule update --init --recursive
+
+
+## SITL BUILD & RUNTIME IMAGE ##
+FROM ubuntu:bionic as SITLRUN
+
+# Trick to get apt-get to not prompt for timezone in tzdata
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Need sudo and lsb-release for the installation prerequisites
+RUN apt-get update && apt-get install -y sudo lsb-release tzdata bc screen
+
+# Pull in ardupilot and build the COPTER
+COPY --from=SITLDOWLOADER /ardupilot /copter
+WORKDIR /copter
 
 # Need USER set so usermod does not fail...
 # Install all prerequisites now
@@ -58,12 +64,9 @@ RUN ./waf distclean
 RUN ./waf configure --board sitl
 RUN ./waf copter
 
+# Prepare executables
 RUN cp build/sitl/bin/arducopter /
-
 COPY copter.parm /copter/Tools/autotest/default_params/copter.parm
-
-# Clean up SSH keys so they aren't easily accessible
-RUN rm -rf /root/.ssh
 
 # TCP 5760 is what the sim exposes by default, each INSTANCE increments by 10
 EXPOSE 5760-7760
@@ -81,7 +84,6 @@ ENV NUMCOPTERS 1
 ENV INCREMENTSTEPLAT 0.01
 ENV INCREMENTSTEPLON 0.01
 
-# Finally the command
-RUN apt-get install -y screen
+# Entrypoint
 COPY startArdupilotSITL.sh /startArdupilotSITL.sh
 ENTRYPOINT /startArdupilotSITL.sh ${NUMCOPTERS} ${LAT} ${LON} ${ALT} ${DIR} ${INCREMENTSTEPLAT} ${INCREMENTSTEPLON} ${COPTERMODEL} ${SPEEDUP}

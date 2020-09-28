@@ -1,15 +1,23 @@
 # UBCUAS Gitlab-CI configuration
 
-image: docker
+image: docker:latest
 
 services:
   - docker:dind
 
 variables:
-  LC_ALL: 'C.UTF-8'
-  LANG: 'C.UTF-8'
   GIT_STRATEGY: fetch
   GIT_SUBMODULE_STRATEGY: recursive
+  DOCKER_CLI_EXPERIMENTAL: enabled
+  DOCKER_BUILDKIT: enabled
+
+TEST STAGE:
+  stage: build
+  tags:
+    - docker
+  script:
+    - ./dockerxenv.sh
+    - docker buildx build --tag ubcuas/uasitl:latest uasitl/ --platform "linux/amd64"
 
 Build & Deploy Classic:
   stage: deploy
@@ -17,20 +25,8 @@ Build & Deploy Classic:
     - docker
   script:
     - docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
-    - ./configure.sh
-    - docker build --tag ubcuas/uasitl:latest x86/
+    - docker build --tag ubcuas/uasitl:latest uasitl/
     - docker push ubcuas/uasitl:latest
-
-# Build & Deploy Classic ARM:
-#   stage: deploy
-#   tags:
-#     - ubcuas
-#     - arm
-#   script:
-#     - docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
-#     - ./configure.sh
-#     - docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:arm arm/
-#     - docker push ubcuas/uasitl:arm
 
 Build & Deploy Accupilot:
   stage: deploy
@@ -38,6 +34,5 @@ Build & Deploy Accupilot:
     - docker
   script:
     - docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
-    - ./configure.sh
-    - ARDUPILOT_REPO=git@gitlab.com:ubcuas/accupilot.git docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:accupilot x86/
+    - ARDUPILOT_REPO=git@gitlab.com:ubcuas/accupilot.git docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:accupilot uasitl/
     - docker push ubcuas/uasitl:accupilot
