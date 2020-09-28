@@ -1,6 +1,6 @@
 # UBCUAS Gitlab-CI configuration
 
-image: docker:latest
+image: itseris/buildx:latest
 
 services:
   - docker:dind
@@ -11,31 +11,21 @@ before_script:
 variables:
   GIT_STRATEGY: fetch
   GIT_SUBMODULE_STRATEGY: recursive
-  DOCKER_CLI_EXPERIMENTAL: enabled
-  DOCKER_BUILDKIT: enabled
-
-TEST STAGE:
-  stage: build
-  tags:
-    - docker
-  script:
-    - ./dockerxenv.sh
-    - docker buildx build --tag ubcuas/uasitl:latest uasitl/ --platform "linux/amd64"
 
 Build & Deploy Classic:
   stage: deploy
   tags:
     - docker
   script:
+    - ./dockerxenv.sh
     - docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
-    - docker build --tag ubcuas/uasitl:latest uasitl/
-    - docker push ubcuas/uasitl:latest
+    - docker buildx build --tag ubcuas/uasitl:latest uasitl/ --platform "linux/amd64" --push
 
 Build & Deploy Accupilot:
   stage: deploy
   tags:
     - docker
   script:
+    - ./dockerxenv.sh
     - docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
-    - ARDUPILOT_REPO=git@gitlab.com:ubcuas/accupilot.git docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:accupilot uasitl/
-    - docker push ubcuas/uasitl:accupilot
+    -  ARDUPILOT_REPO=git@gitlab.com:ubcuas/accupilot.git docker buildx build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:accupilot uasitl/ --platform "linux/amd64" --push

@@ -8,6 +8,5 @@ export DOCKER_BUILDKIT=enabled
 docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
 # Create and bootstrap builder
-docker buildx create --name mubuilder
-docker buildx use mubuilder
+docker buildx create --name mubuilder --use
 docker buildx inspect --bootstrap
