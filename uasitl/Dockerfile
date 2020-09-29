@@ -1,7 +1,8 @@
 # UBC UAS SITL (x86)
-## SITL BUILD IMAGE ##
+
+### SITL DOWNLOAD IMAGE ###
 # Run the downloader in a pre-image so SSH keys are dropped from the image
-FROM ubuntu:bionic as SITLDOWLOADER
+FROM ubuntu:bionic AS SITLDOWLOADER
 
 # Need Git to checkout our sources
 RUN apt-get update && apt-get install -y git
@@ -42,14 +43,14 @@ RUN git checkout $ARDUPILOT_REF
 RUN git submodule update --init --recursive
 
 
-## SITL BUILD & RUNTIME IMAGE ##
-FROM ubuntu:bionic as SITLRUN
+### SITL BUILD IMAGE ###
+FROM ubuntu:bionic AS SITLBUILD
 
 # Trick to get apt-get to not prompt for timezone in tzdata
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Need sudo and lsb-release for the installation prerequisites
-RUN apt-get update && apt-get install -y sudo lsb-release tzdata bc screen
+RUN apt-get update && apt-get install -y sudo lsb-release tzdata bc
 
 # Pull in ardupilot and build the COPTER
 COPY --from=SITLDOWLOADER /ardupilot /copter
@@ -64,8 +65,18 @@ RUN ./waf distclean
 RUN ./waf configure --board sitl
 RUN ./waf copter
 
+
+### SITL RUN IMAGE ###
+FROM ubuntu:bionic AS SITLRUN
+
+# Runtime dependencies
+RUN apt-get update && apt-get install -y python python-pip python-numpy bc screen
+RUN pip install --user -U future lxml pymavlink MAVProxy pexpect
+
 # Prepare executables
-RUN cp build/sitl/bin/arducopter /
+COPY --from=SITLBUILD /copter/Tools/autotest /copter/Tools/autotest
+COPY --from=SITLBUILD /copter/ArduCopter /copter/ArduCopter
+COPY --from=SITLBUILD /copter/build/sitl/bin/arducopter /copter/build/sitl/bin/arducopter
 COPY copter.parm /copter/Tools/autotest/default_params/copter.parm
 
 # TCP 5760 is what the sim exposes by default, each INSTANCE increments by 10
