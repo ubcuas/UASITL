@@ -16,7 +16,7 @@ Build & Deploy Classic:
   stage: deploy
   tags:
     - docker
-    - ubcuas
+    # - ubcuas
   script:
     - ./dockerxenv.sh
     - docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
@@ -26,7 +26,7 @@ Build & Deploy Accupilot:
   stage: deploy
   tags:
     - docker
-    - ubcuas
+    # - ubcuas
   script:
     - ./dockerxenv.sh
     - docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD"
