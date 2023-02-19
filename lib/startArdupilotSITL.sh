@@ -29,7 +29,7 @@ echo "SPEEDUP: $SPEEDUP"
 
 arduPilotInstance=0
 
-if [ $numCopters != 0 ]; then
+if [ $numCopters -ne 0 ]; then
     for i in $(seq 0 $(($numCopters-1))); do
 
            VEHICLE=arducopter
