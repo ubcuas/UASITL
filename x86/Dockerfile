@@ -88,10 +88,10 @@ RUN ./waf copter
 
 
 ### SITL RUN IMAGE ###
-FROM ubuntu:bionic AS SITLRUN
+FROM ubuntu:focal AS SITLRUN
 
 # Runtime dependencies
-RUN apt-get update && apt-get install -y python python-pip python-numpy bc screen
+RUN apt-get update && apt-get install -y python3 python3-pip python-is-python3 python-numpy bc screen
 RUN pip install --user -U future lxml pymavlink MAVProxy pexpect
 
 # Prepare executables
@@ -118,8 +118,8 @@ ENV INCREMENTSTEPLAT 0.01
 ENV INCREMENTSTEPLON 0.01
 
 # Entrypoint
-COPY startArdupilotSITL.sh /startArdupilotSITL.sh
+COPY startArdupilotSITL.sh ./startArdupilotSITL.sh
 # Fix line endings
 RUN sed -i 's/\r$//' startArdupilotSITL.sh
 
-ENTRYPOINT ./startArdupilotSITL.sh ${NUMCOPTERS} ${LAT} ${LON} ${ALT} ${DIR} ${INCREMENTSTEPLAT} ${INCREMENTSTEPLON} ${COPTERMODEL} ${SPEEDUP}
+ENTRYPOINT bash startArdupilotSITL.sh ${NUMCOPTERS} ${LAT} ${LON} ${ALT} ${DIR} ${INCREMENTSTEPLAT} ${INCREMENTSTEPLON} ${COPTERMODEL} ${SPEEDUP}
