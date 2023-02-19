@@ -15,7 +15,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Copy Shared Libraries
-      run: bash ${GITHUB_WORKSPACE}/configure.sh
+      run: |
+        pwd
+        ls
+        bash ${GITHUB_WORKSPACE}/configure.sh
     - name: Build Docker Image
       run: docker build --tag ubcuas/uasitl:latest x86/
     - name: Login to Docker Hub
