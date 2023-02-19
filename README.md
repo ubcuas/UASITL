@@ -1,5 +1,5 @@
-# UBC UAS ArduPilot Software-in-the-Loop Simulator Docker Container
-`UASITL` is a docker container that can be used to run one or more ArduPilot SITL simulators.
+# UBC UAS ArduPilot SITL Docker Container
+`UASITL` is a docker container that can be used to run one or more ArduPilot SITL (software-in-the-Loop) simulators.
 
 
 ## Connections
