@@ -13,7 +13,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v3
 
     - name: Copy Shared Libraries
       run: bash ${GITHUB_WORKSPACE}/configure.sh
@@ -31,35 +32,13 @@ jobs:
     - name: Push Docker Image
       if: ${{ github.event_name != 'pull_request' }}
       run: docker push ubcuas/uasitl:latest
-  
+
   arm:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-
-    - name: Copy Shared Libraries
-      run: bash ${GITHUB_WORKSPACE}/configure.sh
-    
-    - name: Build Multi-Arch Docker Image
-      run: bash ${GITHUB_WORKSPACE}/crossBuild.sh
-    
-    - name: Login to Docker Hub
-      if: ${{ github.event_name != 'pull_request' }}
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_HUB_USER }}
-        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-    
-    - name: Push Docker Image
-      if: ${{ github.event_name != 'pull_request' }}
-      run: docker push ubcuas/uasitl:arm
-
-  arm-alt:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v3
 
     - name: Copy Shared Libraries
       run: bash ${GITHUB_WORKSPACE}/configure.sh
@@ -74,8 +53,8 @@ jobs:
       if: ${{ github.event_name != 'pull_request' }}
       uses: docker/login-action@v2
       with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        username: ${{ secrets.DOCKER_HUB_USER }}
+        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
     
     - name: Build and push
       uses: docker/build-push-action@v4

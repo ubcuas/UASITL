@@ -63,6 +63,8 @@ WORKDIR /copter
 # Need USER set so usermod does not fail...
 # Install all prerequisites now
 COPY install-prereqs-arm.sh ./install-prereqs-arm.sh
+RUN chmod +x install-prereqs-arm.sh
+RUN sed -i 's/\r$//' install-prereqs-arm.sh
 RUN USER=nobody ./install-prereqs-arm.sh -y
 
 # Continue build instructions from https://github.com/ArduPilot/ardupilot/blob/master/BUILD.md
