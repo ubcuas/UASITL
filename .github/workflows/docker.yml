@@ -35,7 +35,7 @@ jobs:
     - uses: actions/checkout@v3
     - name: Copy Shared Libraries
       run: bash ${GITHUB_WORKSPACE}/configure.sh
-    - name: Build Multiarch Docker Image
+    - name: Build Multi-Arch Docker Image
       run: bash ${GITHUB_WORKSPACE}/crossBuild.sh
     - name: Login to Docker Hub
       if: ${{ github.event_name != 'pull_request' }}
