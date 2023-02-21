@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Modified version of https://github.com/ArduPilot/ardupilot/blob/master/Tools/environment_install/install-prereqs-ubuntu.sh
 echo "---------- $0 start ----------"
 set -e

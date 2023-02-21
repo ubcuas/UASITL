@@ -62,10 +62,10 @@ WORKDIR /copter
 
 # Need USER set so usermod does not fail...
 # Install all prerequisites now
-COPY install-prereqs-arm.sh ./install-prereqs-arm.sh
-RUN chmod +x install-prereqs-arm.sh
-RUN sed -i 's/\r$//' install-prereqs-arm.sh
-RUN USER=nobody ./install-prereqs-arm.sh -y
+COPY install-prereqs-arm.sh /
+RUN chmod +x /install-prereqs-arm.sh
+# RUN sed -i 's/\r$//' /install-prereqs-arm.sh
+RUN USER=nobody /install-prereqs-arm.sh -y
 
 # Continue build instructions from https://github.com/ArduPilot/ardupilot/blob/master/BUILD.md
 RUN ./waf distclean
@@ -110,8 +110,8 @@ ENV INCREMENTSTEPLAT 0.01
 ENV INCREMENTSTEPLON 0.01
 
 # Entrypoint
-COPY startArdupilotSITL.sh ./startArdupilotSITL.sh
+COPY startArdupilotSITL.sh /
 # Fix line endings
 RUN sed -i 's/\r$//' startArdupilotSITL.sh
 
-ENTRYPOINT ./startArdupilotSITL.sh ${NUMCOPTERS} ${LAT} ${LON} ${ALT} ${DIR} ${INCREMENTSTEPLAT} ${INCREMENTSTEPLON} ${COPTERMODEL} ${SPEEDUP}
+ENTRYPOINT /startArdupilotSITL.sh ${NUMCOPTERS} ${LAT} ${LON} ${ALT} ${DIR} ${INCREMENTSTEPLAT} ${INCREMENTSTEPLON} ${COPTERMODEL} ${SPEEDUP}
