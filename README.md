@@ -18,7 +18,8 @@
 ## Installation
 The image can be directly pulled from DockerHub:
 ```
-docker pull ubcuas/uasitl:latest
+FOR x86: docker pull ubcuas/uasitl:latest
+FOR arm: docker pull ubcuas/uasitl:arm
 ```
 
 The image can also be built locally:
@@ -48,12 +49,12 @@ docker run --rm -p 5760-5780:5760-5780 -it --network=gcom-x_uasnet --name=uasitl
 
 To launch a single ArduCopter SITL on host TCP port 5760:
 ```
-docker run --rm -p 5760-5780:5760-5780 -it ubcuas/uasitl:latest
+docker run --rm -p 5760-5780:5760-5780 -it --name=uasitl ubcuas/uasitl:latest
 ```
 
 To start 3 ArduCopter SITLs on host TCP ports 5760, 5770 and 5780:
 ```
-docker run --rm -p 5760-5780:5760-5780 --env NUMCOPTERS=3 -it ubcuas/uasitl:latest
+docker run --rm -p 5760-5780:5760-5780 --env NUMCOPTERS=3 -it --name=uasitl ubcuas/uasitl:latest
 ```
 
 
