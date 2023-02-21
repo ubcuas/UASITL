@@ -1,10 +1,13 @@
-# UBC UAS ArduPilot Software-in-the-Loop Simulator Docker Container
-`UASITL` is a docker container that can be used to run one or more ArduPilot SITL simulators.
+[![License: MIT](https://img.shields.io/github/license/vintasoftware/django-react-boilerplate.svg)](LICENSE)
+[![Docker CI](https://github.com/ubcuas/UASITL/actions/workflows/docker.yml/badge.svg)](https://github.com/ubcuas/UASITL/actions/workflows/docker.yml)
+
+# UBC UAS ArduPilot SITL Docker Container
+`UASITL` is a docker container that can be used to run one or more ArduPilot SITL (software-in-the-Loop) simulators.
 
 
 ## Connections
 ```
-[SkyLink]---<tcp/mavlink>---[UASITL]
+[ACOM/MissionPlanner/SkyLink]---<tcp/mavlink>---[UASITL]
 ```
 
 
@@ -15,23 +18,27 @@
 ## Installation
 The image can be directly pulled from DockerHub:
 ```
-docker pull ubcuas/uasitl:latest
+FOR x86: docker pull ubcuas/uasitl:latest
+FOR arm: docker pull ubcuas/uasitl:arm
 ```
 
 The image can also be built locally:
 ```
 ./configure.sh
-docker build --tag ubcuas/uasitl:latest uasitl/
+FOR x86: docker build --tag ubcuas/uasitl:latest x86/ --platform "linux/amd64"
+FOR armv7: docker build --tag ubcuas/uasitl:arm arm/ --platform "linux/arm/v7"
+FOR arm64: docker build --tag ubcuas/uasitl:arm arm/ --platform "linux/arm64"
 ```
 
 The image can be built using a custom `Ardupilot` repository:
 ```
 ./configure.sh
-ARDUPILOT_REPO=git@gitlab.com:ubcuas/accupilot.git docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:accupilot uasitl/
+FOR x86: ARDUPILOT_REPO=git@gitlab.com:ubcuas/accupilot.git docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:accupilot x86/
+FOR arm: ARDUPILOT_REPO=git@gitlab.com:ubcuas/accupilot.git docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:accupilot arm/
 ```
 
 Please note the bash variable `$SSH_PRIVATE_KEY` needs to be a valid ssh private key. If you are building on command line you can do this in one shot like so: `--build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa)"`.
-`ARDUPILOT_REPO` is an ssh git url to an ardupilot repository.
+`ARDUPILOT_REPO` is an ssh git url to an ardupilot repository. **WARNING: Building locally bakes your private SSH key into the docker image, do NOT share this image with others.**
 
 
 ## Usage
@@ -42,12 +49,12 @@ docker run --rm -p 5760-5780:5760-5780 -it --network=gcom-x_uasnet --name=uasitl
 
 To launch a single ArduCopter SITL on host TCP port 5760:
 ```
-docker run --rm -p 5760-5780:5760-5780 -it ubcuas/uasitl:latest
+docker run --rm -p 5760-5780:5760-5780 -it --name=uasitl ubcuas/uasitl:latest
 ```
 
 To start 3 ArduCopter SITLs on host TCP ports 5760, 5770 and 5780:
 ```
-docker run --rm -p 5760-5780:5760-5780 --env NUMCOPTERS=3 -it ubcuas/uasitl:latest
+docker run --rm -p 5760-5780:5760-5780 --env NUMCOPTERS=3 -it --name=uasitl ubcuas/uasitl:latest
 ```
 
 
@@ -60,7 +67,3 @@ docker run --rm -p 5760-5780:5760-5780 --env NUMCOPTERS=3 -it ubcuas/uasitl:late
 ----
 `Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?` or similar.
 > You need to run the `docker` commands as root. Use sudo: `sudo docker <command>`. Or add yourself to the docker group.
-
-----
-`Anything Else`
-> Contact `Eric Mikulin`
