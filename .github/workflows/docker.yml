@@ -35,6 +35,8 @@ jobs:
         platforms: linux/amd64
         push: ${{ github.event_name != 'pull_request' }}
         tags: ubcuas/uasitl:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
 
   arm:
@@ -67,3 +69,5 @@ jobs:
         platforms: linux/arm/v7,linux/arm64
         push: ${{ github.event_name != 'pull_request' }}
         tags: ubcuas/uasitl:arm
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
