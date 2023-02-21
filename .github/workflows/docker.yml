@@ -20,6 +20,9 @@ jobs:
 
     - name: Copy Shared Libraries
       run: bash ${GITHUB_WORKSPACE}/configure.sh
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
     
     - name: Login to Docker Hub
       if: ${{ github.event_name != 'pull_request' }}
