@@ -63,6 +63,7 @@ WORKDIR /copter
 # Need USER set so usermod does not fail...
 # Install all prerequisites now
 COPY install-prereqs-arm.sh /
+# Give execute permissions
 RUN chmod +x /install-prereqs-arm.sh
 RUN USER=nobody /install-prereqs-arm.sh -y
 
@@ -110,7 +111,7 @@ ENV INCREMENTSTEPLON 0.01
 
 # Entrypoint
 COPY startArdupilotSITL.sh /
-# Fix line endings
-RUN sed -i 's/\r$//' startArdupilotSITL.sh
+# Give execute permissions
+RUN chmod +x /startArdupilotSITL.sh
 
 ENTRYPOINT /startArdupilotSITL.sh ${NUMCOPTERS} ${LAT} ${LON} ${ALT} ${DIR} ${INCREMENTSTEPLAT} ${INCREMENTSTEPLON} ${COPTERMODEL} ${SPEEDUP}

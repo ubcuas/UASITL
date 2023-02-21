@@ -119,7 +119,7 @@ ENV INCREMENTSTEPLON 0.01
 
 # Entrypoint
 COPY startArdupilotSITL.sh /
-# Fix line endings
-RUN sed -i 's/\r$//' startArdupilotSITL.sh
+# Give execute permissions
+RUN chmod +x /startArdupilotSITL.sh
 
 ENTRYPOINT /startArdupilotSITL.sh ${NUMCOPTERS} ${LAT} ${LON} ${ALT} ${DIR} ${INCREMENTSTEPLAT} ${INCREMENTSTEPLON} ${COPTERMODEL} ${SPEEDUP}
