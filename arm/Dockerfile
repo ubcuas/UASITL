@@ -46,6 +46,9 @@ RUN git submodule update --init --recursive
 ### SITL BUILD IMAGE ###
 FROM ubuntu:focal AS SITLBUILD
 
+# Trick to get apt-get to not prompt for timezone in tzdata
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Need sudo and lsb-release for the installation prerequisites
 RUN apt-get update && apt-get install -y sudo lsb-release tzdata bc screen
 RUN cp /etc/apt/sources.list /etc/apt/sources.list~ && \
@@ -59,8 +62,8 @@ WORKDIR /copter
 
 # Need USER set so usermod does not fail...
 # Install all prerequisites now
-COPY install-prereqs-arm.sh /
-RUN USER=nobody /install-prereqs-arm.sh -y
+COPY install-prereqs-arm.sh ./install-prereqs-arm.sh
+RUN USER=nobody ./install-prereqs-arm.sh -y
 
 # Continue build instructions from https://github.com/ArduPilot/ardupilot/blob/master/BUILD.md
 RUN ./waf distclean
