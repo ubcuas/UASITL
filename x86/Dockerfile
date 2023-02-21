@@ -30,7 +30,7 @@ RUN [ -z "$SSH_PRIVATE_KEY" ] || \
 
 # The ARDUPILOT repo and ref to use for the build
 ENV ARDUPILOT_REPO=https://github.com/ArduPilot/ardupilot.git
-ENV ARDUPILOT_REF=master
+ENV ARDUPILOT_REF=Copter-4.3.3
 
 # Now grab ArduPilot from GitHub
 RUN git clone $ARDUPILOT_REPO ardupilot
@@ -119,7 +119,7 @@ ENV INCREMENTSTEPLON 0.01
 
 # Entrypoint
 COPY startArdupilotSITL.sh /
-# Fix line endings
-RUN sed -i 's/\r$//' startArdupilotSITL.sh
+# Give execute permissions
+RUN chmod +x /startArdupilotSITL.sh
 
 ENTRYPOINT /startArdupilotSITL.sh ${NUMCOPTERS} ${LAT} ${LON} ${ALT} ${DIR} ${INCREMENTSTEPLAT} ${INCREMENTSTEPLON} ${COPTERMODEL} ${SPEEDUP}
