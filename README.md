@@ -1,3 +1,6 @@
+[![License: MIT](https://img.shields.io/github/license/vintasoftware/django-react-boilerplate.svg)](LICENSE)
+[![Docker CI](https://github.com/ubcuas/UASITL/actions/workflows/docker.yml/badge.svg)](https://github.com/ubcuas/UASITL/actions/workflows/docker.yml)
+
 # UBC UAS ArduPilot SITL Docker Container
 `UASITL` is a docker container that can be used to run one or more ArduPilot SITL (software-in-the-Loop) simulators.
 

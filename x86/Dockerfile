@@ -2,7 +2,7 @@
 
 ### SITL DOWNLOAD IMAGE ###
 # Run the downloader in a pre-image so SSH keys are dropped from the image
-FROM ubuntu:bionic AS SITLDOWNLOADER
+FROM ubuntu:focal AS SITLDOWNLOADER
 
 # Need Git to checkout our sources
 RUN apt-get update && apt-get install -y git
@@ -44,14 +44,14 @@ RUN git submodule update --init --recursive
 
 
 ### SITL BUILD IMAGE ###
-FROM ubuntu:bionic AS SITLBUILD
-
-# Trick to get apt-get to not prompt for timezone in tzdata
-ENV DEBIAN_FRONTEND=noninteractive
+FROM ubuntu:focal AS SITLBUILD
 
 # Pull in ardupilot and build the COPTER
 COPY --from=SITLDOWNLOADER /ardupilot /copter
 WORKDIR /copter
+
+# Trick to get apt-get to not prompt for timezone in tzdata
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Create a non-root user for the build
 ARG USER_NAME=copter
