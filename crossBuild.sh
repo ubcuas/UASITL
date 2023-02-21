@@ -1,5 +1,5 @@
 # Add QEMU stuff
-# docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
 # Create and bootstrap builder
 docker buildx create --name mubuilder
