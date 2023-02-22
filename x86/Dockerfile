@@ -46,10 +46,6 @@ RUN git submodule update --init --recursive
 ### SITL BUILD IMAGE ###
 FROM ubuntu:focal AS SITLBUILD
 
-# Pull in ardupilot and build the COPTER
-COPY --from=SITLDOWNLOADER /ardupilot /copter
-WORKDIR /copter
-
 # Trick to get apt-get to not prompt for timezone in tzdata
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -66,6 +62,10 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     sudo \
     tzdata \
     bash-completion
+
+# Pull in ardupilot and build the COPTER
+COPY --from=SITLDOWNLOADER /ardupilot /copter
+WORKDIR /copter
 
 # Create non root user for pip
 ENV USER=${USER_NAME}
