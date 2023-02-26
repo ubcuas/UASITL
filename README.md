@@ -1,8 +1,8 @@
 [![License: MIT](https://img.shields.io/github/license/vintasoftware/django-react-boilerplate.svg)](LICENSE)
 [![Docker CI](https://github.com/ubcuas/UASITL/actions/workflows/docker.yml/badge.svg)](https://github.com/ubcuas/UASITL/actions/workflows/docker.yml)
 
-# UBC UAS ArduPilot SITL Docker Container
-`UASITL` is a docker container that can be used to run one or more ArduPilot SITL (software-in-the-Loop) simulators.
+# UBC UAS ArduPilot SITL Docker Images
+`UASITL` is a collection of docker images that can be used to run one or more ArduPilot SITL (software-in-the-Loop) simulators.
 
 
 ## Connections
@@ -16,19 +16,28 @@
 
 
 ## Installation
-The image can be directly pulled from DockerHub:
+The images can be directly pulled from DockerHub:
 ```
 FOR x86: docker pull ubcuas/uasitl:latest
 FOR arm: docker pull ubcuas/uasitl:arm
 ```
 
-The image can also be built locally:
+The images can also be built locally:
 ```
 ./configure.sh
 FOR x86: docker build --tag ubcuas/uasitl:latest x86/ --platform "linux/amd64"
 FOR armv7: docker build --tag ubcuas/uasitl:arm arm/ --platform "linux/arm/v7"
 FOR arm64: docker build --tag ubcuas/uasitl:arm arm/ --platform "linux/arm64"
 ```
+> **Note**
+> If you get an error akin to `./configure.sh: line 2: $'\r': command not found` then run `sed -i 's/\r$//' configure.sh` to fix the line endings.
+
+To build the armv7 and arm64 images on x86, you need to run the following commands:
+```
+./configure.sh
+./crossBuild.sh
+```
+
 
 The image can be built using a custom `Ardupilot` repository:
 ```
@@ -67,3 +76,7 @@ docker run --rm -p 5760-5780:5760-5780 --env NUMCOPTERS=3 -it --name=uasitl ubcu
 ----
 `Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?` or similar.
 > You need to run the `docker` commands as root. Use sudo: `sudo docker <command>`. Or add yourself to the docker group.
+
+----
+`filename: line 2: $'\r': command not found`
+> Run `sed -i 's/\r$//' filename` to fix the line endings.

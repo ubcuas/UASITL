@@ -46,6 +46,7 @@ if [ $numCopters -ne 0 ]; then
                 --custom-location=${LAT},${LON},${ALT},${DIR} \
                 -w \
                 --speedup ${SPEEDUP} \
+                -f ${COPTERMODEL} \
                 --no-rebuild \
                 --no-mavproxy"
 

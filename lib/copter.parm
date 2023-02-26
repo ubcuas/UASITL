@@ -1,16 +1,22 @@
-ARMING_CHECK    0
-EK2_ENABLE      1
-FRAME_TYPE  0
-MAG_ENABLE  1
+# Current version parameters: https://ardupilot.org/copter/docs/parameters-Copter-stable-V4.3.3.html
+# Simulation parameters: https://ardupilot.org/copter/docs/parameters.html#simulation-parameters
+# Current Official ArduPilot defaults: https://github.com/ArduPilot/ardupilot/blob/master/Tools/autotest/default_params/copter.parm
+FRAME_TYPE      1 # X Type - https://ardupilot.org/copter/docs/frame-type-configuration.html
 FS_THR_ENABLE   1
+ARSPD_PIN 1
+ARSPD_BUS 2
+ATC_RAT_YAW_P 0.09
+ATC_RAT_YAW_I 0.009
 BATT_MONITOR    4
-COMPASS_LEARN   0
 COMPASS_OFS_X   5
 COMPASS_OFS_Y   13
 COMPASS_OFS_Z   -18
 COMPASS_OFS2_X   5
 COMPASS_OFS2_Y   13
 COMPASS_OFS2_Z   -18
+COMPASS_OFS3_X   5
+COMPASS_OFS3_Y   13
+COMPASS_OFS3_Z   -18
 FENCE_RADIUS    150
 FRAME_CLASS     1
 RC1_MAX         2000.000000
@@ -45,16 +51,9 @@ FLTMODE4        3
 FLTMODE5        5
 FLTMODE6        0
 SUPER_SIMPLE    0
-SIM_GPS_DELAY   1
-SIM_ACC_RND     0
-SIM_GYR_RND     0
 SIM_WIND_SPD    0
 SIM_WIND_TURB   0
 SIM_BARO_RND    0
-SIM_MAG_RND     0
-SIM_GPS_GLITCH_X    0
-SIM_GPS_GLITCH_Y    0
-SIM_GPS_GLITCH_Z    0
 # we need small INS_ACC offsets so INS is recognised as being calibrated
 INS_ACCOFFS_X   0.001
 INS_ACCOFFS_Y   0.001
@@ -75,7 +74,7 @@ INS_ACC3SCAL_X   1.000
 INS_ACC3SCAL_Y   1.000
 INS_ACC3SCAL_Z   1.000
 MOT_THST_EXPO 0.5
-MOT_THST_HOVER  0.36
+MOT_THST_HOVER  0.39
 # flightmodes
 # switch 1 Circle
 # switch 2 LAND
