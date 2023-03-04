@@ -329,7 +329,7 @@ SCRIPT_DIR=$(dirname $(realpath ${BASH_SOURCE[0]}))
 ARDUPILOT_ROOT=$(realpath "$SCRIPT_DIR/../../")
 
 if [[ ${ARDUPILOT_ROOT} == "/" ]]; then
-    ARDUPILOT_ROOT="/copter"
+    ARDUPILOT_ROOT="/vehicle"
 fi
 
 if [[ $DO_AP_STM_ENV -eq 1 ]]; then
