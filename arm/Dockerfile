@@ -28,15 +28,23 @@ RUN [ -z "$SSH_PRIVATE_KEY" ] || \
     chmod 600 /root/.ssh/id_rsa.pub \
     )
 
+# Take in a parameter for the vehicle type
+ARG VEHICLE_TYPE
+
+# if --build-arg VEHICLE_TYPE=1, set ARDUPILOT_TAG to 'Plane-4.3.4' or set to null otherwise.
+ENV ARDUPILOT_TAG=${VEHICLE_TYPE:+Plane-4.3.4}
+# if ARDUPILOT_TAG is null, set it to 'Copter-4.3.4' (or leave as is otherwise).
+ENV ARDUPILOT_TAG=${ARDUPILOT_TAG:-Copter-4.3.4}
+
 # The ARDUPILOT repo and ref to use for the build
 ENV ARDUPILOT_REPO=https://github.com/ArduPilot/ardupilot.git
-ENV ARDUPILOT_REF=Copter-4.3.4
+ENV ARDUPILOT_REF=$ARDUPILOT_TAG
 
 # Now grab ArduPilot from GitHub
 RUN git clone $ARDUPILOT_REPO ardupilot
 WORKDIR /ardupilot
 
-# Checkout the latest Copter
+# Checkout the latest Copter/Plane release
 RUN git checkout $ARDUPILOT_REF
 
 # Pull submodule dependencies
@@ -56,9 +64,9 @@ RUN cp /etc/apt/sources.list /etc/apt/sources.list~ && \
     apt-get update
 RUN apt-get build-dep -y python-pygame
 
-# Pull in ardupilot and build the COPTER
-COPY --from=SITLDOWNLOADER /ardupilot /copter
-WORKDIR /copter
+# Pull in ardupilot and build the vehicle
+COPY --from=SITLDOWNLOADER /ardupilot /vehicle
+WORKDIR /vehicle
 
 # Need USER set so usermod does not fail...
 # Install all prerequisites now
@@ -67,10 +75,18 @@ COPY install-prereqs-arm.sh /
 RUN chmod +x /install-prereqs-arm.sh
 RUN USER=nobody /install-prereqs-arm.sh -y
 
+# Take in a parameter for the vehicle type
+ARG VEHICLE_TYPE
+
+# if --build-arg VEHICLE_TYPE=1, set WAF_VEHICLE to 'plane' or set to null otherwise.
+ENV WAF_VEHICLE=${VEHICLE_TYPE:+plane}
+# if WAF_VEHICLE is null, set it to 'copter' (or leave as is otherwise).
+ENV WAF_VEHICLE=${WAF_VEHICLE:-copter}
+
 # Continue build instructions from https://github.com/ArduPilot/ardupilot/blob/master/BUILD.md
 RUN ./waf distclean
 RUN ./waf configure --board sitl
-RUN ./waf copter
+RUN ./waf $WAF_VEHICLE
 
 
 ### SITL RUN IMAGE ###
@@ -86,12 +102,26 @@ RUN cp /etc/apt/sources.list /etc/apt/sources.list~ && \
 RUN apt-get build-dep python3-lxml -y
 RUN pip install --user -U future lxml pymavlink MAVProxy pexpect
 
-# Prepare executables
-COPY --from=SITLBUILD /copter/Tools/autotest /copter/Tools/autotest
-COPY --from=SITLBUILD /copter/ArduCopter /copter/ArduCopter
-COPY --from=SITLBUILD /copter/build/sitl/bin/arducopter /copter/build/sitl/bin/arducopter
+# Take in a parameter for the vehicle type
+ARG VEHICLE_TYPE
 
-COPY copter.parm /copter/Tools/autotest/default_params/copter.parm
+# if --build-arg VEHICLE_TYPE=1, set VEHICLE params to plane or set to null otherwise.
+ENV VEHICLE=${VEHICLE_TYPE:+ArduPlane}
+ENV VEHICLE_LOWER=${VEHICLE_TYPE:+arduplane}
+ENV VEHICLE_PARAM=${VEHICLE_TYPE:+plane.parm}
+ENV VEHICLE_FRAME=${VEHICLE_TYPE:+quadplane}
+# if above variables are null, set them copter (or leave as is otherwise).
+ENV VEHICLE=${VEHICLE:-ArduCopter}
+ENV VEHICLE_LOWER=${VEHICLE_LOWER:-arducopter}
+ENV VEHICLE_PARAM=${VEHICLE_PARAM:-copter.parm}
+ENV VEHICLE_FRAME=${VEHICLE_FRAME:-X}
+
+# Prepare executables
+COPY --from=SITLBUILD /vehicle/Tools/autotest /vehicle/Tools/autotest
+COPY --from=SITLBUILD /vehicle/$VEHICLE /vehicle/$VEHICLE
+COPY --from=SITLBUILD /vehicle/build/sitl/bin/$VEHICLE_LOWER /vehicle/build/sitl/bin/$VEHICLE_LOWER
+
+COPY $VEHICLE_PARAM /${VEHICLE}/Tools/autotest/default_params/$VEHICLE_PARAM
 
 # TCP 5760 is what the sim exposes by default, each INSTANCE increments by 10
 EXPOSE 5760-7760
@@ -102,10 +132,10 @@ ENV LAT 38.315139
 ENV LON -76.548751
 ENV ALT 14
 ENV DIR 270
-ENV COPTERMODEL X
+ENV VEHICLEMODEL ${VEHICLE_FRAME}
 ENV SPEEDUP 1
-ENV VEHICLE ArduCopter
-ENV NUMCOPTERS 1
+ENV VEHICLE $VEHICLE
+ENV NUMVEHICLES 1
 ENV INCREMENTSTEPLAT 0.01
 ENV INCREMENTSTEPLON 0.01
 
@@ -114,4 +144,4 @@ COPY startArdupilotSITL.sh /
 # Give execute permissions
 RUN chmod +x /startArdupilotSITL.sh
 
-ENTRYPOINT /startArdupilotSITL.sh ${NUMCOPTERS} ${LAT} ${LON} ${ALT} ${DIR} ${INCREMENTSTEPLAT} ${INCREMENTSTEPLON} ${COPTERMODEL} ${SPEEDUP}
+ENTRYPOINT /startArdupilotSITL.sh ${NUMVEHICLES} ${LAT} ${LON} ${ALT} ${DIR} ${INCREMENTSTEPLAT} ${INCREMENTSTEPLON} ${VEHICLE} ${VEHICLEMODEL} ${SPEEDUP}

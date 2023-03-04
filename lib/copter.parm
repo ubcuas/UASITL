@@ -1,4 +1,4 @@
-# Current version parameters: https://ardupilot.org/copter/docs/parameters-Copter-stable-V4.3.3.html
+# Current version parameters: https://ardupilot.org/copter/docs/parameters-Copter-stable-V4.3.4.html
 # Simulation parameters: https://ardupilot.org/copter/docs/parameters.html#simulation-parameters
 # Current Official ArduPilot defaults: https://github.com/ArduPilot/ardupilot/blob/master/Tools/autotest/default_params/copter.parm
 FRAME_TYPE      1 # X Type - https://ardupilot.org/copter/docs/frame-type-configuration.html

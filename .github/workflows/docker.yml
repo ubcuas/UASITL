@@ -9,7 +9,7 @@ on:
     branches: [ "master" ]
 
 jobs:
-  x86:
+  Copter-x86:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,12 +35,12 @@ jobs:
         context: x86/
         platforms: linux/amd64
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ubcuas/uasitl:latest
+        tags: ubcuas/uasitl:copter
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
 
-  arm:
+  Copter-arm:
     runs-on: ubuntu-latest
 
     steps:
@@ -69,6 +69,73 @@ jobs:
         context: arm/
         platforms: linux/arm/v7,linux/arm64
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ubcuas/uasitl:arm
+        tags: ubcuas/uasitl:copter-arm
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  
+  Plane-x86:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Copy Shared Libraries
+      run: bash ${GITHUB_WORKSPACE}/configure.sh
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    
+    - name: Login to Docker Hub
+      if: ${{ github.event_name != 'pull_request' }}
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_HUB_USER }}
+        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+    
+    - name: Build and Push
+      uses: docker/build-push-action@v4
+      with:
+        context: x86/
+        platforms: linux/amd64
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ubcuas/uasitl:plane
+        build-args: VEHICLE_TYPE=1
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+
+  Plane-arm:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Copy Shared Libraries
+      run: bash ${GITHUB_WORKSPACE}/configure.sh
+    
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    
+    - name: Login to Docker Hub
+      if: ${{ github.event_name != 'pull_request' }}
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_HUB_USER }}
+        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+    
+    - name: Build and Push
+      uses: docker/build-push-action@v4
+      with:
+        context: arm/
+        platforms: linux/arm/v7,linux/arm64
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ubcuas/uasitl:plane-arm
+        build-args: VEHICLE_TYPE=1
         cache-from: type=gha
         cache-to: type=gha,mode=max
