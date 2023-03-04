@@ -30,7 +30,7 @@ RUN [ -z "$SSH_PRIVATE_KEY" ] || \
 
 # The ARDUPILOT repo and ref to use for the build
 ENV ARDUPILOT_REPO=https://github.com/ArduPilot/ardupilot.git
-ENV ARDUPILOT_REF=Copter-4.3.3
+ENV ARDUPILOT_REF=Copter-4.3.4
 
 # Now grab ArduPilot from GitHub
 RUN git clone $ARDUPILOT_REPO ardupilot
