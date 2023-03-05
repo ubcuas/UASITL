@@ -1,19 +1,20 @@
 #!/bin/bash
 
-numCopters=$1
+numVehicles=$1
 initialAgentLat=$2
 initialAgentLon=$3
 initialAgentAlt=$4
 initialAgentHeading=$5
 incrementStepLat=$6
-incrementStepLon=${7}
-COPTERMODEL=${8}
-SPEEDUP=${9}
+incrementStepLon=$7
+VEHICLE=$8
+VEHICLEMODEL=$9
+SPEEDUP=$10
 
 incrementStepAlt=0
 incrementStepHdg=0
 
-echo "Number of Copters: $numCopters"
+echo "Number of ${VEHICLE}s: $numVehicles"
 
 # Start ArduPilots
 LAT=${initialAgentLat}
@@ -24,29 +25,28 @@ HDG=${initialAgentHeading}
 echo "Initial Position: $LAT,$LON,$ALT,$HDG"
 echo "Increment Lat: $incrementStepLat"
 echo "Increment Lon: $incrementStepLon"
-echo "CopterModel: $COPTERMODEL"
-echo "SPEEDUP: $SPEEDUP"
+echo "VehicleModel: $VEHICLEMODEL"
+echo "Speedup: $SPEEDUP"
 
 arduPilotInstance=0
 
-if [ $numCopters -ne 0 ]; then
-    for i in $(seq 0 $(($numCopters-1))); do
+if [ $numVehicles -ne 0 ]; then
+    for i in $(seq 0 $(($numVehicles-1))); do
 
-            VEHICLE=arducopter
             INSTANCE=$arduPilotInstance
 
-            export SITL_RITW_TERMINAL="screen -D -m -S Copter${INSTANCE}"
+            export SITL_RITW_TERMINAL="screen -D -m -S ${VEHICLE}${INSTANCE}"
             
             rm -rf ./${VEHICLE}${INSTANCE}
             mkdir ./${VEHICLE}${INSTANCE} && cd ${VEHICLE}${INSTANCE}
 
-            simCommand="/copter/Tools/autotest/sim_vehicle.py \
+            simCommand="/vehicle/Tools/autotest/sim_vehicle.py \
                 -I${INSTANCE} \
-                --vehicle ArduCopter \
+                --vehicle ${VEHICLE} \
                 --custom-location=${LAT},${LON},${ALT},${DIR} \
                 -w \
                 --speedup ${SPEEDUP} \
-                -f ${COPTERMODEL} \
+                -f ${VEHICLEMODEL} \
                 --no-rebuild \
                 --no-mavproxy"
 
