@@ -1,15 +1,15 @@
 #!/bin/bash
 
-numVehicles=$1
-initialAgentLat=$2
-initialAgentLon=$3
-initialAgentAlt=$4
-initialAgentHeading=$5
-incrementStepLat=$6
-incrementStepLon=$7
-VEHICLE=$8
-VEHICLEMODEL=$9
-SPEEDUP=$10
+numVehicles=${1}
+initialAgentLat=${2}
+initialAgentLon=${3}
+initialAgentAlt=${4}
+initialAgentHeading=${5}
+incrementStepLat=${6}
+incrementStepLon=${7}
+VEHICLE=${8}
+VEHICLEMODEL=${9}
+SPEEDUP=${10}
 
 incrementStepAlt=0
 incrementStepHdg=0
