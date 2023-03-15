@@ -33,8 +33,8 @@ ARG VEHICLE_TYPE
 
 # if --build-arg VEHICLE_TYPE=1, set ARDUPILOT_TAG to 'Plane-4.3.4' or set to null otherwise.
 ENV ARDUPILOT_TAG=${VEHICLE_TYPE:+Plane-4.3.4}
-# if ARDUPILOT_TAG is null, set it to 'Copter-4.3.4' (or leave as is otherwise).
-ENV ARDUPILOT_TAG=${ARDUPILOT_TAG:-Copter-4.3.4}
+# if ARDUPILOT_TAG is null, set it to 'Copter-4.3.5' (or leave as is otherwise).
+ENV ARDUPILOT_TAG=${ARDUPILOT_TAG:-Copter-4.3.5}
 
 # The ARDUPILOT repo and ref to use for the build
 ENV ARDUPILOT_REPO=https://github.com/ArduPilot/ardupilot.git
