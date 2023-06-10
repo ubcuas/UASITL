@@ -7,14 +7,16 @@ initialAgentAlt=${4}
 initialAgentHeading=${5}
 incrementStepLat=${6}
 incrementStepLon=${7}
-VEHICLE=${8}
-VEHICLEMODEL=${9}
-SPEEDUP=${10}
+vehicle=${8}
+vehicleModel=${9}
+speedup=${10}
+paramFile=${11}
+paramFileArg=""
 
 incrementStepAlt=0
 incrementStepHdg=0
 
-echo "Number of ${VEHICLE}s: $numVehicles"
+echo "Number of ${vehicle}s: $numVehicles"
 
 # Start ArduPilots
 LAT=${initialAgentLat}
@@ -25,32 +27,38 @@ HDG=${initialAgentHeading}
 echo "Initial Position: $LAT,$LON,$ALT,$HDG"
 echo "Increment Lat: $incrementStepLat"
 echo "Increment Lon: $incrementStepLon"
-echo "VehicleModel: $VEHICLEMODEL"
-echo "Speedup: $SPEEDUP"
+echo "VehicleModel: $vehicleModel"
+echo "Speedup: $speedup"
 
 arduPilotInstance=0
+
+# Add param file if one is specified
+if [ -n "$paramFile" ]; then
+    paramFileArg="--add-param-file=${paramFile}"
+fi
 
 if [ $numVehicles -ne 0 ]; then
     for i in $(seq 0 $(($numVehicles-1))); do
 
             INSTANCE=$arduPilotInstance
 
-            export SITL_RITW_TERMINAL="screen -D -m -S ${VEHICLE}${INSTANCE}"
+            export SITL_RITW_TERMINAL="screen -D -m -S ${vehicle}${INSTANCE}"
             
-            rm -rf ./${VEHICLE}${INSTANCE}
-            mkdir ./${VEHICLE}${INSTANCE} && cd ${VEHICLE}${INSTANCE}
+            rm -rf ./${vehicle}${INSTANCE}
+            mkdir ./${vehicle}${INSTANCE} && cd ${vehicle}${INSTANCE}
 
             simCommand="/vehicle/Tools/autotest/sim_vehicle.py \
-                -I${INSTANCE} \
-                --vehicle ${VEHICLE} \
+                -I ${INSTANCE} \
+                --vehicle=${vehicle} \
                 --custom-location=${LAT},${LON},${ALT},${DIR} \
                 -w \
-                --speedup ${SPEEDUP} \
-                -f ${VEHICLEMODEL} \
+                --speedup ${speedup} \
+                --frame=${vehicleModel} \
                 --no-rebuild \
-                --no-mavproxy"
+                --no-mavproxy \
+                ${paramFileArg}"
 
-            echo "Starting Sim ${VEHICLE} with command '$simCommand'"
+            echo "Starting Sim ${vehicle} with command '$simCommand'"
             exec $simCommand &
             pids[${arduPilotInstance}]=$!
 
