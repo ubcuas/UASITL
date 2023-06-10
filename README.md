@@ -68,6 +68,13 @@ To launch a single ArduCopter SITL on host TCP port 5760, with the ability for t
 docker run --rm -p 5760-5780:5760-5780 -it --network=gcom-x_uasnet --name=uasitl ubcuas/uasitl:copter
 ```
 
+To launch a single ArduCopter SITL on host TCP port 5760, with the ability for the rest of our services to connect, and with a custom parameter file located in the current directory:
+> **Note**
+> Docker volume mounts (-v option) needs absolute paths. `${PWD}` is a Windows Powershell variable that expands to the current working directory. For Linux, use `$(pwd)` and for Command Prompt use `%cd%`.
+```
+docker run --rm -p 5760-5780:5760-5780 -it --network=gcom-x_uasnet --name=uasitl -v ${PWD}/custom-copter.param:/custom-copter.param --env PARAM_FILE=/custom-copter.param ubcuas/uasitl:copter --defaults=/ardupilot/Tools/autotest/default_params/copter.parm
+```
+
 To launch a single ArduCopter SITL on host TCP port 5760:
 ```
 docker run --rm -p 5760-5780:5760-5780 -it --name=uasitl ubcuas/uasitl:copter

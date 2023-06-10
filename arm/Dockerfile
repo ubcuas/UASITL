@@ -34,7 +34,7 @@ ARG VEHICLE_TYPE
 # if --build-arg VEHICLE_TYPE=1, set ARDUPILOT_TAG to 'Plane-X.X.X' or set to null otherwise.
 ENV ARDUPILOT_TAG=${VEHICLE_TYPE:+Plane-4.3.4}
 # if ARDUPILOT_TAG is null, set it to 'Copter-X.X.X' (or leave as is otherwise).
-ENV ARDUPILOT_TAG=${ARDUPILOT_TAG:-Copter-4.3.6}
+ENV ARDUPILOT_TAG=${ARDUPILOT_TAG:-Copter-4.3.7}
 
 # The ARDUPILOT repo and ref to use for the build
 ENV ARDUPILOT_REPO=https://github.com/ArduPilot/ardupilot.git
@@ -138,10 +138,12 @@ ENV VEHICLE $VEHICLE
 ENV NUMVEHICLES 1
 ENV INCREMENTSTEPLAT 0.01
 ENV INCREMENTSTEPLON 0.01
+# Default to no custom parameter file
+ENV PARAM_FILE "" 
 
 # Entrypoint
 COPY startArdupilotSITL.sh /
 # Give execute permissions
 RUN chmod +x /startArdupilotSITL.sh
 
-ENTRYPOINT /startArdupilotSITL.sh ${NUMVEHICLES} ${LAT} ${LON} ${ALT} ${DIR} ${INCREMENTSTEPLAT} ${INCREMENTSTEPLON} ${VEHICLE} ${VEHICLEMODEL} ${SPEEDUP}
+ENTRYPOINT /startArdupilotSITL.sh ${NUMVEHICLES} ${LAT} ${LON} ${ALT} ${DIR} ${INCREMENTSTEPLAT} ${INCREMENTSTEPLON} ${VEHICLE} ${VEHICLEMODEL} ${SPEEDUP}  ${PARAM_FILE}
