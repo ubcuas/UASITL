@@ -31,10 +31,14 @@ RUN [ -z "$SSH_PRIVATE_KEY" ] || \
 # Take in a parameter for the vehicle type
 ARG VEHICLE_TYPE
 
+# Get parameter for ardupilot release, fail if empty
+ARG VERSION
+RUN test -n "$VERSION" || (echo "VERSION not set" && false)
+
 # if --build-arg VEHICLE_TYPE=1, set ARDUPILOT_TAG to 'Plane-X.X.X' or set to null otherwise.
-ENV ARDUPILOT_TAG=${VEHICLE_TYPE:+Plane-4.3.4}
+ENV ARDUPILOT_TAG=${VEHICLE_TYPE:+Plane-${VERSION}}
 # if ARDUPILOT_TAG is null, set it to 'Copter-X.X.X' (or leave as is otherwise).
-ENV ARDUPILOT_TAG=${ARDUPILOT_TAG:-Copter-4.3.7}
+ENV ARDUPILOT_TAG=${ARDUPILOT_TAG:-Copter-${VERSION}}
 
 # The ARDUPILOT repo and ref to use for the build
 ENV ARDUPILOT_REPO=https://github.com/ArduPilot/ardupilot.git
