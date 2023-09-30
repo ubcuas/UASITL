@@ -18,6 +18,10 @@ on:
         required: true
         type: string
 
+env:
+  COPTER_VERSION: '4.3.7'
+  PLANE_VERSION: '4.3.4'
+
 jobs:
   Copter-x86:
     runs-on: ubuntu-latest
@@ -45,8 +49,8 @@ jobs:
         context: x86/
         platforms: linux/amd64
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ubcuas/uasitl:copter-${{ inputs.copter || '4.3.7' }}
-        build-args: VERSION=${{ inputs.copter || '4.3.7' }}
+        tags: ubcuas/uasitl:copter,ubcuas/uasitl:copter-${{ inputs.copter || env.COPTER_VERSION }}
+        build-args: VERSION=${{ inputs.copter || env.COPTER_VERSION }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -80,8 +84,8 @@ jobs:
         context: arm/
         platforms: linux/arm/v7,linux/arm64
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ubcuas/uasitl:copter-arm-${{ inputs.copter || '4.3.7' }}
-        build-args: VERSION=${{ inputs.copter || '4.3.7' }}
+        tags: ubcuas/uasitl:copter-arm-${{ inputs.copter || env.COPTER_VERSION }}
+        build-args: VERSION=${{ inputs.copter || env.COPTER_VERSION }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -112,8 +116,8 @@ jobs:
         context: x86/
         platforms: linux/amd64
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ubcuas/uasitl:plane-${{ inputs.plane || '4.3.4' }}
-        build-args: VEHICLE_TYPE=1,VERSION=${{ inputs.plane || '4.3.4' }}
+        tags: ubcuas/uasitl:plane-${{ inputs.plane || env.PLANE_VERSION }}
+        build-args: VEHICLE_TYPE=1,VERSION=${{ inputs.plane || env.PLANE_VERSION }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -147,7 +151,7 @@ jobs:
         context: arm/
         platforms: linux/arm/v7,linux/arm64
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ubcuas/uasitl:plane-arm-${{ inputs.plane || '4.3.4' }}
-        build-args: VEHICLE_TYPE=1,VERSION=${{ inputs.plane || '4.3.4' }}
+        tags: ubcuas/uasitl:plane-arm-${{ inputs.plane || env.PLANE_VERSION }}
+        build-args: VEHICLE_TYPE=1,VERSION=${{ inputs.plane || env.PLANE_VERSION }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
