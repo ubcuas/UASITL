@@ -49,7 +49,7 @@ jobs:
         context: x86/
         platforms: linux/amd64
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ubcuas/uasitl:copter,ubcuas/uasitl:copter-${{ inputs.copter || env.COPTER_VERSION }}
+        tags: ubcuas/uasitl:copter-${{ inputs.copter || env.COPTER_VERSION }}
         build-args: VERSION=${{ inputs.copter || env.COPTER_VERSION }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
