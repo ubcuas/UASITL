@@ -117,7 +117,9 @@ jobs:
         platforms: linux/amd64
         push: ${{ github.event_name != 'pull_request' }}
         tags: ubcuas/uasitl:plane-${{ inputs.plane || env.PLANE_VERSION }}
-        build-args: VEHICLE_TYPE=1,VERSION=${{ inputs.plane || env.PLANE_VERSION }}
+        build-args: |
+          VEHICLE_TYPE=1
+          VERSION=${{ inputs.plane || env.PLANE_VERSION }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -152,6 +154,8 @@ jobs:
         platforms: linux/arm/v7,linux/arm64
         push: ${{ github.event_name != 'pull_request' }}
         tags: ubcuas/uasitl:plane-arm-${{ inputs.plane || env.PLANE_VERSION }}
-        build-args: VEHICLE_TYPE=1,VERSION=${{ inputs.plane || env.PLANE_VERSION }}
+        build-args: |
+          VEHICLE_TYPE=1
+          VERSION=${{ inputs.plane || env.PLANE_VERSION }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
