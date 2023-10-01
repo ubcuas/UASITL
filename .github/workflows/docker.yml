@@ -14,7 +14,7 @@ on:
         required: true
         type: string
       plane:
-        description: 'Plane Version Number'
+        description: 'Plane Version (#.#.#): [Releases](https://github.com/ArduPilot/ardupilot/tags)'
         required: true
         type: string
 
