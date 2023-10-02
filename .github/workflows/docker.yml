@@ -7,6 +7,20 @@ on:
     branches: [ "master" ]
   merge_group:
     branches: [ "master" ]
+  workflow_dispatch:
+    inputs:
+      copter:
+        description: 'Copter Version (#.#.#): [Releases](https://github.com/ArduPilot/ardupilot/tags)'
+        required: true
+        type: string
+      plane:
+        description: 'Plane Version (#.#.#): [Releases](https://github.com/ArduPilot/ardupilot/tags)'
+        required: true
+        type: string
+
+env:
+  COPTER_VERSION: '4.3.7'
+  PLANE_VERSION: '4.3.4'
 
 jobs:
   Copter-x86:
@@ -35,7 +49,8 @@ jobs:
         context: x86/
         platforms: linux/amd64
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ubcuas/uasitl:copter
+        tags: ubcuas/uasitl:copter-${{ inputs.copter || env.COPTER_VERSION }}
+        build-args: VERSION=${{ inputs.copter || env.COPTER_VERSION }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -62,14 +77,15 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_HUB_USER }}
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-    
+
     - name: Build and Push
       uses: docker/build-push-action@v4
       with:
         context: arm/
         platforms: linux/arm/v7,linux/arm64
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ubcuas/uasitl:copter-arm
+        tags: ubcuas/uasitl:copter-arm-${{ inputs.copter || env.COPTER_VERSION }}
+        build-args: VERSION=${{ inputs.copter || env.COPTER_VERSION }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -93,15 +109,17 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_HUB_USER }}
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-    
+
     - name: Build and Push
       uses: docker/build-push-action@v4
       with:
         context: x86/
         platforms: linux/amd64
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ubcuas/uasitl:plane
-        build-args: VEHICLE_TYPE=1
+        tags: ubcuas/uasitl:plane-${{ inputs.plane || env.PLANE_VERSION }}
+        build-args: |
+          VEHICLE_TYPE=1
+          VERSION=${{ inputs.plane || env.PLANE_VERSION }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -128,14 +146,16 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_HUB_USER }}
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-    
+
     - name: Build and Push
       uses: docker/build-push-action@v4
       with:
         context: arm/
         platforms: linux/arm/v7,linux/arm64
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ubcuas/uasitl:plane-arm
-        build-args: VEHICLE_TYPE=1
+        tags: ubcuas/uasitl:plane-arm-${{ inputs.plane || env.PLANE_VERSION }}
+        build-args: |
+          VEHICLE_TYPE=1
+          VERSION=${{ inputs.plane || env.PLANE_VERSION }}
         cache-from: type=gha
         cache-to: type=gha,mode=max

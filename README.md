@@ -18,17 +18,20 @@
 
 ## Installation
 The images can be directly pulled from DockerHub:
+> **Note**
+> Replace X.X.X with version number
+
 
 **ArduPlane (VTOL):**
 ```
-FOR x86: docker pull ubcuas/uasitl:plane
-FOR arm: docker pull ubcuas/uasitl:plane-arm
+FOR x86: docker pull ubcuas/uasitl:plane-X.X.X
+FOR arm: docker pull ubcuas/uasitl:plane-arm-X.X.X
 ```
 
 **ArduCopter (Quadcopter):**
 ```
-FOR x86: docker pull ubcuas/uasitl:copter
-FOR arm: docker pull ubcuas/uasitl:copter-arm
+FOR x86: docker pull ubcuas/uasitl:copter-X.X.X
+FOR arm: docker pull ubcuas/uasitl:copter-arm-X.X.X
 ```
 
 The images can also be built locally:
@@ -36,9 +39,9 @@ The images can also be built locally:
 > To build for ArduPlane, add `--build-arg VEHICLE_TYPE=1` to the build command. Also change the tag to `plane` or `plane-arm` depending on the architecture.
 ```
 ./configure.sh
-FOR x86: docker build --tag ubcuas/uasitl:copter x86/ --platform "linux/amd64"
-FOR armv7: docker build --tag ubcuas/uasitl:copter-arm arm/ --platform "linux/arm/v7"
-FOR arm64: docker build --tag ubcuas/uasitl:copter-arm arm/ --platform "linux/arm64"
+FOR x86: docker build --tag ubcuas/uasitl:copter-X.X.X --build-arg VERSION=X.X.X x86/ --platform "linux/amd64"
+FOR armv7: docker build --tag ubcuas/uasitl:copter-arm-X.X.X --build-arg VERSION=X.X.X arm/ --platform "linux/arm/v7"
+FOR arm64: docker build --tag ubcuas/uasitl:copter-arm-X.X.X --build-arg VERSION=X.X.X arm/ --platform "linux/arm64"
 ```
 > **Note**
 > If you get an error akin to `./configure.sh: line 2: $'\r': command not found` then run `sed -i 's/\r$//' configure.sh` to fix the line endings.
@@ -46,8 +49,8 @@ FOR arm64: docker build --tag ubcuas/uasitl:copter-arm arm/ --platform "linux/ar
 To build the armv7 and arm64 images on x86, you need to run the following commands:
 ```
 ./configure.sh
-ArduCopter: ./crossBuild.sh copter
-ArduPlane: ./crossBuild.sh plane
+ArduCopter: ./crossBuild.sh copter X.X.X
+ArduPlane: ./crossBuild.sh plane X.X.X
 ```
 
 
@@ -65,24 +68,24 @@ Please note the bash variable `$SSH_PRIVATE_KEY` needs to be a valid ssh private
 ## Usage
 To launch a single ArduCopter SITL on host TCP port 5760, with the ability for the rest of our services to connect:
 ```
-docker run --rm -p 5760-5780:5760-5780 -it --network=gcom-x_uasnet --name=uasitl ubcuas/uasitl:copter
+docker run --rm -p 5760-5780:5760-5780 -it --network=gcom-x_uasnet --name=uasitl ubcuas/uasitl:copter-X.X.X
 ```
 
 To launch a single ArduCopter SITL on host TCP port 5760, with the ability for the rest of our services to connect, and with a custom parameter file located in the current directory:
 > **Note**
 > Docker volume mounts (-v option) needs absolute paths. `${PWD}` is a Windows Powershell variable that expands to the current working directory. For Linux, use `$(pwd)` and for Command Prompt use `%cd%`.
 ```
-docker run --rm -p 5760-5780:5760-5780 -it --network=gcom-x_uasnet --name=uasitl -v ${PWD}/custom-copter.param:/custom-copter.param --env PARAM_FILE=/custom-copter.param ubcuas/uasitl:copter --defaults=/ardupilot/Tools/autotest/default_params/copter.parm
+docker run --rm -p 5760-5780:5760-5780 -it --network=gcom-x_uasnet --name=uasitl -v ${PWD}/custom-copter.param:/custom-copter.param --env PARAM_FILE=/custom-copter.param ubcuas/uasitl:copter-X.X.X --defaults=/ardupilot/Tools/autotest/default_params/copter.parm
 ```
 
 To launch a single ArduCopter SITL on host TCP port 5760:
 ```
-docker run --rm -p 5760-5780:5760-5780 -it --name=uasitl ubcuas/uasitl:copter
+docker run --rm -p 5760-5780:5760-5780 -it --name=uasitl ubcuas/uasitl:copter-X.X.X
 ```
 
 To start 3 ArduCopter SITLs on host TCP ports 5760, 5770 and 5780:
 ```
-docker run --rm -p 5760-5780:5760-5780 --env NUMCOPTERS=3 -it --name=uasitl ubcuas/uasitl:copter
+docker run --rm -p 5760-5780:5760-5780 --env NUMCOPTERS=3 -it --name=uasitl ubcuas/uasitl:copter-X.X.X
 ```
 
 
