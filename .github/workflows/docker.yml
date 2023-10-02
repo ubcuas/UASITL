@@ -10,11 +10,11 @@ on:
   workflow_dispatch:
     inputs:
       copter:
-        description: 'Copter Version (#.#.#): [Releases](https://github.com/ArduPilot/ardupilot/tags)'
+        description: 'Copter Version (#.#.#)'
         required: true
         type: string
       plane:
-        description: 'Plane Version (#.#.#): [Releases](https://github.com/ArduPilot/ardupilot/tags)'
+        description: 'Plane Version (#.#.#)'
         required: true
         type: string
 
