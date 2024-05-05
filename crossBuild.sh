@@ -1,6 +1,6 @@
 vehicleType=$1
 version=$2
-buildArgs="--build-arg ${version}"
+buildArgs="--build-arg VERSION=${version}"
 
 if [[ "$vehicleType" == "" || "$vehicleType" == "copter" ]]; then
     echo "Building ArduCopter"
@@ -15,15 +15,14 @@ else
 fi
 
 # Add QEMU stuff
-docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+docker run --privileged --rm tonistiigi/binfmt --install arm64,arm
 
 # Create and bootstrap builder
-docker buildx create --name mubuilder
-docker buildx use mubuilder
+docker buildx create --name mubuilder --use
 docker buildx inspect --bootstrap
 
 # Build and push images
 docker buildx build ${buildArgs} --tag ubcuas/uasitl:${vehicleType}-arm-${version} --output type=image arm/ --platform "linux/arm64,linux/arm/v7"
 
 # Cleanup
-docker buildx rm mubuilder
+docker buildx rm --keep-state mubuilder
