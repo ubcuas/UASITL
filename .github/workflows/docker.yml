@@ -26,18 +26,35 @@ env:
   PLANE_VERSION: '4.5.0'
 
 jobs:
+  configure-matrix:
+    name: Configure Matrix
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' || inputs.copter || inputs.plane }}
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+    - name: Set Matrix
+      id: set-matrix
+      run: |
+        array=()
+        if [[ ${{ github.event_name }} == 'pull_request' || -n "${{ inputs.copter }}" ]]; then
+          array+=("{\"vehicle\": \"copter\", \"arch\": \"x86\"}" "{\"vehicle\": \"copter\", \"arch\": \"arm\"}")
+        fi
+        if [[ ${{ github.event_name }} == 'pull_request' || -n "${{ inputs.plane }}" ]]; then
+          array+=("{\"vehicle\": \"plane\", \"arch\": \"x86\"}" "{\"vehicle\": \"plane\", \"arch\": \"arm\"}")
+        fi
+
+        matrix=$(jq -c -n '$ARGS.positional' --jsonargs "${array[@]}")
+
+        echo "matrix={\"include\":$(echo $matrix)}" >> $GITHUB_OUTPUT
+
   build-push:
     name: Build and Push
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' || inputs.copter || inputs.plane }}
+    needs: configure-matrix
     strategy:
-      matrix:
-        vehicle: [ 'copter', 'plane' ]
-        arch: [ 'x86', 'arm' ]
-        # Exclude any vehicles where the version is not specified
-        # This works since setting the version to '' causes the exclusion to match
-        exclude:
-          - vehicle: copter${{ (github.event == 'pull_request' && 'run') || inputs.copter }}
-          - vehicle: plane${{ (github.event == 'pull_request' && 'run') || inputs.plane }}
+      matrix: ${{fromJSON(needs.configure-matrix.outputs.matrix)}}
     
     steps:
     - name: Checkout
