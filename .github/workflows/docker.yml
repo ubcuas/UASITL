@@ -106,6 +106,6 @@ jobs:
       if: ${{ github.event_name != 'pull_request' }}
       uses: actions/attest-build-provenance@v1
       with:
-        subject-name: index.docker.io/ubcuas/uasitl:${{ matrix.vehicle }}${{ matrix.arch == 'arm' && '-arm' || '' }}-${{ env.VERSION }}
+        subject-name: index.docker.io/ubcuas/uasitl
         subject-digest: ${{ steps.build-push.outputs.digest }}
         push-to-registry: true
