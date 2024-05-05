@@ -36,8 +36,8 @@ jobs:
         # Exclude any vehicles where the version is not specified
         # This works since setting the version to '' causes the exclusion to match
         exclude:
-          - vehicle: copter${{ inputs.copter }}
-          - vehicle: vehicle${{ inputs.plane }}
+          - vehicle: copter${{ inputs.copter || (github.event == 'pull_request' && 'run') }}
+          - vehicle: plane${{ inputs.plane || (github.event == 'pull_request' && 'run') }}
     
     steps:
     - name: Checkout
