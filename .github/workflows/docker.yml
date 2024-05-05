@@ -55,6 +55,9 @@ jobs:
     needs: configure-matrix
     strategy:
       matrix: ${{fromJSON(needs.configure-matrix.outputs.matrix)}}
+    permissions:
+      id-token: write
+      attestations: write
     
     steps:
     - name: Checkout
@@ -86,6 +89,7 @@ jobs:
         fi
 
     - name: Build and Push
+      id: build-push
       uses: docker/build-push-action@v5
       with:
         context: ${{ matrix.arch }}/
@@ -97,3 +101,10 @@ jobs:
           ${{ matrix.vehicle == 'plane' && 'VEHICLE_TYPE=1' || '' }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
+
+    - name: Attest Build Provenance
+      uses: actions/attest-build-provenance@v1
+      with:
+        subject-name: index.docker.io/ubcuas/uasitl:${{ matrix.vehicle }}${{ matrix.arch == 'arm' && '-arm' || '' }}-${{ env.VERSION }}
+        subject-digest: ${{ steps.build-push.outputs.digest }}
+        push-to-registry: ${{ github.event_name != 'pull_request' }}
