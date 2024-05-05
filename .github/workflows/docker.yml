@@ -1,4 +1,4 @@
-name: Docker CI
+name: Docker CI/CD
 
 on:
   push:
@@ -11,151 +11,100 @@ on:
     inputs:
       copter:
         description: 'Copter Version (#.#.#)'
-        required: true
+        required: false
+        default: ''
         type: string
       plane:
         description: 'Plane Version (#.#.#)'
-        required: true
+        required: false
+        default: ''
         type: string
 
+# For pull request validation, build a default version of each vehicle
 env:
-  COPTER_VERSION: '4.3.7'
-  PLANE_VERSION: '4.3.4'
+  COPTER_VERSION: '4.5.1'
+  PLANE_VERSION: '4.5.0'
 
 jobs:
-  Copter-x86:
+  configure-matrix:
+    name: Configure Matrix
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' || inputs.copter || inputs.plane }}
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+    - name: Set Matrix
+      id: set-matrix
+      run: |
+        array=()
+        if [[ ${{ github.event_name }} == 'pull_request' || -n "${{ inputs.copter }}" ]]; then
+          array+=("{\"vehicle\": \"copter\", \"arch\": \"x86\"}" "{\"vehicle\": \"copter\", \"arch\": \"arm\"}")
+        fi
+        if [[ ${{ github.event_name }} == 'pull_request' || -n "${{ inputs.plane }}" ]]; then
+          array+=("{\"vehicle\": \"plane\", \"arch\": \"x86\"}" "{\"vehicle\": \"plane\", \"arch\": \"arm\"}")
+        fi
 
+        matrix=$(jq -c -n '$ARGS.positional' --jsonargs "${array[@]}")
+
+        echo "matrix={\"include\":$(echo $matrix)}" >> $GITHUB_OUTPUT
+
+  build-push:
+    name: Build and Push
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' || inputs.copter || inputs.plane }}
+    needs: configure-matrix
+    strategy:
+      matrix: ${{fromJSON(needs.configure-matrix.outputs.matrix)}}
+    permissions:
+      id-token: write
+      attestations: write
+    
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Copy Shared Libraries
       run: bash ${GITHUB_WORKSPACE}/configure.sh
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-    
-    - name: Login to Docker Hub
-      if: ${{ github.event_name != 'pull_request' }}
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_HUB_USER }}
-        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-    
-    - name: Build and Push
-      uses: docker/build-push-action@v4
-      with:
-        context: x86/
-        platforms: linux/amd64
-        push: ${{ github.event_name != 'pull_request' }}
-        tags: ubcuas/uasitl:copter-${{ inputs.copter || env.COPTER_VERSION }}
-        build-args: VERSION=${{ inputs.copter || env.COPTER_VERSION }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
-
-  Copter-arm:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Copy Shared Libraries
-      run: bash ${GITHUB_WORKSPACE}/configure.sh
-    
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-    
+      if: ${{ matrix.arch == 'arm' }}
+      uses: docker/setup-qemu-action@v3
+
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-    
+      uses: docker/setup-buildx-action@v3
+
     - name: Login to Docker Hub
       if: ${{ github.event_name != 'pull_request' }}
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_HUB_USER }}
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
-    - name: Build and Push
-      uses: docker/build-push-action@v4
-      with:
-        context: arm/
-        platforms: linux/arm/v7,linux/arm64
-        push: ${{ github.event_name != 'pull_request' }}
-        tags: ubcuas/uasitl:copter-arm-${{ inputs.copter || env.COPTER_VERSION }}
-        build-args: VERSION=${{ inputs.copter || env.COPTER_VERSION }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
-  
-  Plane-x86:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Copy Shared Libraries
-      run: bash ${GITHUB_WORKSPACE}/configure.sh
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-    
-    - name: Login to Docker Hub
-      if: ${{ github.event_name != 'pull_request' }}
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_HUB_USER }}
-        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+    - name: Configure Version
+      run: |
+        if [[ ${{ matrix.vehicle }} == 'copter' ]]; then
+          echo "VERSION=${{ inputs.copter || env.COPTER_VERSION }}" >> $GITHUB_ENV
+        else
+          echo "VERSION=${{ inputs.plane || env.PLANE_VERSION }}" >> $GITHUB_ENV
+        fi
 
     - name: Build and Push
-      uses: docker/build-push-action@v4
+      id: build-push
+      uses: docker/build-push-action@v5
       with:
-        context: x86/
-        platforms: linux/amd64
+        context: ${{ matrix.arch }}/
+        platforms: ${{ (matrix.arch == 'x86' && 'linux/amd64') || 'linux/arm/v7,linux/arm64' }}
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ubcuas/uasitl:plane-${{ inputs.plane || env.PLANE_VERSION }}
+        tags: ubcuas/uasitl:${{ matrix.vehicle }}${{ matrix.arch == 'arm' && '-arm' || '' }}-${{ env.VERSION }}
         build-args: |
-          VEHICLE_TYPE=1
-          VERSION=${{ inputs.plane || env.PLANE_VERSION }}
+          VERSION=${{ env.VERSION }}
+          ${{ matrix.vehicle == 'plane' && 'VEHICLE_TYPE=1' || '' }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-
-  Plane-arm:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-
-    - name: Copy Shared Libraries
-      run: bash ${GITHUB_WORKSPACE}/configure.sh
-    
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-    
-    - name: Login to Docker Hub
+    - name: Attest Build Provenance
       if: ${{ github.event_name != 'pull_request' }}
-      uses: docker/login-action@v2
+      uses: actions/attest-build-provenance@v1
       with:
-        username: ${{ secrets.DOCKER_HUB_USER }}
-        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-
-    - name: Build and Push
-      uses: docker/build-push-action@v4
-      with:
-        context: arm/
-        platforms: linux/arm/v7,linux/arm64
-        push: ${{ github.event_name != 'pull_request' }}
-        tags: ubcuas/uasitl:plane-arm-${{ inputs.plane || env.PLANE_VERSION }}
-        build-args: |
-          VEHICLE_TYPE=1
-          VERSION=${{ inputs.plane || env.PLANE_VERSION }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        subject-name: index.docker.io/ubcuas/uasitl
+        subject-digest: ${{ steps.build-push.outputs.digest }}

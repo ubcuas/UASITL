@@ -2,7 +2,7 @@
 
 ### SITL DOWNLOAD IMAGE ###
 # Run the downloader in a pre-image so SSH keys are dropped from the image
-FROM ubuntu:focal AS SITLDOWNLOADER
+FROM ubuntu:22.04 AS SITLDOWNLOADER
 
 # Need Git to checkout our sources
 RUN apt-get update && apt-get install -y git
@@ -49,14 +49,13 @@ RUN git clone $ARDUPILOT_REPO ardupilot
 WORKDIR /ardupilot
 
 # Checkout the latest Copter/Plane release
-RUN git checkout $ARDUPILOT_REF
-
-# Pull submodule dependencies
-RUN git submodule update --init --recursive
+RUN git checkout $ARDUPILOT_REF \
+    # Pull submodule dependencies
+    && git submodule update --init --recursive
 
 
 ### SITL BUILD IMAGE ###
-FROM ubuntu:focal AS SITLBUILD
+FROM ubuntu:22.04 AS SITLBUILD
 
 # Trick to get apt-get to not prompt for timezone in tzdata
 ENV DEBIAN_FRONTEND=noninteractive
@@ -82,10 +81,9 @@ WORKDIR /vehicle
 # Create non root user for pip
 ENV USER=${USER_NAME}
 
-RUN echo "vehicle ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USER_NAME}
-RUN chmod 0440 /etc/sudoers.d/${USER_NAME}
-
-RUN chown -R ${USER_NAME}:${USER_NAME} /${USER_NAME}
+RUN echo "vehicle ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USER_NAME} \
+    && chmod 0440 /etc/sudoers.d/${USER_NAME} \
+    && chown -R ${USER_NAME}:${USER_NAME} /vehicle
 
 USER ${USER_NAME}
 
@@ -102,17 +100,19 @@ ENV WAF_VEHICLE=${VEHICLE_TYPE:+plane}
 ENV WAF_VEHICLE=${WAF_VEHICLE:-copter}
 
 # Continue build instructions from https://github.com/ArduPilot/ardupilot/blob/master/BUILD.md
-RUN ./waf distclean
-RUN ./waf configure --board sitl
-RUN ./waf $WAF_VEHICLE
+RUN ./waf distclean \
+    && ./waf configure --board sitl \
+    && ./waf $WAF_VEHICLE
 
 
 ### SITL RUN IMAGE ###
-FROM ubuntu:focal AS SITLRUN
+FROM ubuntu:22.04 AS SITLRUN
 
 # Runtime dependencies
-RUN apt-get update && apt-get install -y python3 python3-pip python-is-python3 python-numpy bc screen
-RUN pip install --user -U future lxml pymavlink MAVProxy pexpect
+RUN apt-get update && apt-get install --no-install-recommends -y python3 python3-pip python-is-python3 python3-numpy bc screen \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir --user -U future lxml pymavlink MAVProxy pexpect
 
 # Take in a parameter for the vehicle type
 ARG VEHICLE_TYPE

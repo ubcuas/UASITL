@@ -18,8 +18,8 @@
 
 ## Installation
 The images can be directly pulled from DockerHub:
-> **Note**
-> Replace X.X.X with version number
+> [!NOTE]
+> Replace X.X.X with the desired version number
 
 
 **ArduPlane (VTOL):**
@@ -35,7 +35,7 @@ FOR arm: docker pull ubcuas/uasitl:copter-arm-X.X.X
 ```
 
 The images can also be built locally:
-> **Note**
+> [!NOTE]
 > To build for ArduPlane, add `--build-arg VEHICLE_TYPE=1` to the build command. Also change the tag to `plane` or `plane-arm` depending on the architecture.
 ```
 ./configure.sh
@@ -43,8 +43,8 @@ FOR x86: docker build --tag ubcuas/uasitl:copter-X.X.X --build-arg VERSION=X.X.X
 FOR armv7: docker build --tag ubcuas/uasitl:copter-arm-X.X.X --build-arg VERSION=X.X.X arm/ --platform "linux/arm/v7"
 FOR arm64: docker build --tag ubcuas/uasitl:copter-arm-X.X.X --build-arg VERSION=X.X.X arm/ --platform "linux/arm64"
 ```
-> **Note**
-> If you get an error akin to `./configure.sh: line 2: $'\r': command not found` then run `sed -i 's/\r$//' configure.sh` to fix the line endings.
+> [!NOTE]
+> If you get an error akin to `./configure.sh: line 2: $'\r': command not found` then run `sed 's/\r$//' configure.sh > configure.sh.new && mv configure.sh.new configure.sh` to fix the line endings.
 
 To build the armv7 and arm64 images on x86, you need to run the following commands:
 ```
@@ -72,7 +72,7 @@ docker run --rm -p 5760-5780:5760-5780 -it --network=gcom-x_uasnet --name=uasitl
 ```
 
 To launch a single ArduCopter SITL on host TCP port 5760, with the ability for the rest of our services to connect, and with a custom parameter file located in the current directory:
-> **Note**
+> [!NOTE]
 > Docker volume mounts (-v option) needs absolute paths. `${PWD}` is a Windows Powershell variable that expands to the current working directory. For Linux, use `$(pwd)` and for Command Prompt use `%cd%`.
 ```
 docker run --rm -p 5760-5780:5760-5780 -it --network=gcom-x_uasnet --name=uasitl -v ${PWD}/custom-copter.param:/custom-copter.param --env PARAM_FILE=/custom-copter.param ubcuas/uasitl:copter-X.X.X --defaults=/ardupilot/Tools/autotest/default_params/copter.parm
