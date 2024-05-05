@@ -1,5 +1,4 @@
 arm/*
 !arm/Dockerfile
-!arm/install-prereqs-arm.sh
 x86/*
 !x86/Dockerfile
