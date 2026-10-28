@@ -22,33 +22,27 @@ The images can be directly pulled from DockerHub:
 > Replace X.X.X with the desired version number
 
 
+Images are multi-arch (`linux/amd64`, `linux/arm64`), so the same tag works on x86 and ARM.
+
 **ArduPlane (VTOL):**
 ```
-FOR x86: docker pull ubcuas/uasitl:plane-X.X.X
-FOR arm: docker pull ubcuas/uasitl:plane-arm-X.X.X
+docker pull ubcuas/uasitl:plane-X.X.X
 ```
 
 **ArduCopter (Quadcopter):**
 ```
-FOR x86: docker pull ubcuas/uasitl:copter-X.X.X
-FOR arm: docker pull ubcuas/uasitl:copter-arm-X.X.X
+docker pull ubcuas/uasitl:copter-X.X.X
 ```
 
-The images can also be built locally:
+The images can also be built locally for your machine's architecture:
 > [!NOTE]
-> To build for ArduPlane, add `--build-arg VEHICLE_TYPE=1` to the build command. Also change the tag to `plane` or `plane-arm` depending on the architecture.
+> To build for ArduPlane, add `--build-arg VEHICLE_TYPE=1` to the build command. Also change the tag to `plane`.
 ```
-./configure.sh
-FOR x86: docker build --tag ubcuas/uasitl:copter-X.X.X --build-arg VERSION=X.X.X x86/ --platform "linux/amd64"
-FOR armv7: docker build --tag ubcuas/uasitl:copter-arm-X.X.X --build-arg VERSION=X.X.X arm/ --platform "linux/arm/v7"
-FOR arm64: docker build --tag ubcuas/uasitl:copter-arm-X.X.X --build-arg VERSION=X.X.X arm/ --platform "linux/arm64"
+docker build --tag ubcuas/uasitl:copter-X.X.X --build-arg VERSION=X.X.X .
 ```
-> [!NOTE]
-> If you get an error akin to `./configure.sh: line 2: $'\r': command not found` then run `sed 's/\r$//' configure.sh > configure.sh.new && mv configure.sh.new configure.sh` to fix the line endings.
 
-To build the armv7 and arm64 images on x86, you need to run the following commands:
+To build for all architectures at once (uses QEMU emulation, so the ARM builds are slow):
 ```
-./configure.sh
 ArduCopter: ./crossBuild.sh copter X.X.X
 ArduPlane: ./crossBuild.sh plane X.X.X
 ```
@@ -56,9 +50,7 @@ ArduPlane: ./crossBuild.sh plane X.X.X
 
 The image can be built using a custom `Ardupilot` repository:
 ```
-./configure.sh
-FOR x86: ARDUPILOT_REPO=git@gitlab.com:ubcuas/accupilot.git docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:accupilot x86/
-FOR arm: ARDUPILOT_REPO=git@gitlab.com:ubcuas/accupilot.git docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:accupilot arm/
+ARDUPILOT_REPO=git@gitlab.com:ubcuas/accupilot.git docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" --tag ubcuas/uasitl:accupilot .
 ```
 
 Please note the bash variable `$SSH_PRIVATE_KEY` needs to be a valid ssh private key. If you are building on command line you can do this in one shot like so: `--build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa)"`.
