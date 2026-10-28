@@ -22,7 +22,7 @@ on:
 
 # For pull request validation, build a default version of each vehicle
 env:
-  COPTER_VERSION: '4.5.1'
+  COPTER_VERSION: '4.5.5'
   PLANE_VERSION: '4.5.0'
 
 jobs:
