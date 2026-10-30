@@ -22,7 +22,7 @@ on:
 
 # For pull request validation, build a default version of each vehicle
 env:
-  COPTER_VERSION: '4.5.1'
+  COPTER_VERSION: '4.5.5'
   PLANE_VERSION: '4.5.0'
 
 jobs:
@@ -38,10 +38,10 @@ jobs:
       run: |
         array=()
         if [[ ${{ github.event_name }} == 'pull_request' || -n "${{ inputs.copter }}" ]]; then
-          array+=("{\"vehicle\": \"copter\", \"arch\": \"x86\"}" "{\"vehicle\": \"copter\", \"arch\": \"arm\"}")
+          array+=("{\"vehicle\": \"copter\"}")
         fi
         if [[ ${{ github.event_name }} == 'pull_request' || -n "${{ inputs.plane }}" ]]; then
-          array+=("{\"vehicle\": \"plane\", \"arch\": \"x86\"}" "{\"vehicle\": \"plane\", \"arch\": \"arm\"}")
+          array+=("{\"vehicle\": \"plane\"}")
         fi
 
         matrix=$(jq -c -n '$ARGS.positional' --jsonargs "${array[@]}")
@@ -63,12 +63,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Copy Shared Libraries
-      run: bash ${GITHUB_WORKSPACE}/configure.sh
-
     - name: Set up QEMU
-      if: ${{ matrix.arch == 'arm' }}
       uses: docker/setup-qemu-action@v3
+      with:
+        # binfmt:latest (qemu v10.2.3) segfaults in ldconfig during arm64 apt installs
+        image: tonistiigi/binfmt:qemu-v9.2.2
+        platforms: arm64
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -92,10 +92,10 @@ jobs:
       id: build-push
       uses: docker/build-push-action@v5
       with:
-        context: ${{ matrix.arch }}/
-        platforms: ${{ (matrix.arch == 'x86' && 'linux/amd64') || 'linux/arm/v7,linux/arm64' }}
+        context: .
+        platforms: linux/amd64,linux/arm64
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ubcuas/uasitl:${{ matrix.vehicle }}${{ matrix.arch == 'arm' && '-arm' || '' }}-${{ env.VERSION }}
+        tags: ubcuas/uasitl:${{ matrix.vehicle }}-${{ env.VERSION }}
         build-args: |
           VERSION=${{ env.VERSION }}
           ${{ matrix.vehicle == 'plane' && 'VEHICLE_TYPE=1' || '' }}

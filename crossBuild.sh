@@ -15,14 +15,8 @@ else
 fi
 
 # Add QEMU stuff
-docker run --privileged --rm tonistiigi/binfmt --install arm64,arm
+docker run --privileged --rm tonistiigi/binfmt --install arm64
 
-# Create and bootstrap builder
-docker buildx create --name mubuilder --use
-docker buildx inspect --bootstrap
-
-# Build and push images
-docker buildx build ${buildArgs} --tag ubcuas/uasitl:${vehicleType}-arm-${version} --output type=image arm/ --platform "linux/arm64,linux/arm/v7"
-
-# Cleanup
-docker buildx rm --keep-state mubuilder
+# Build a single multi-arch image
+# --load of a multi-platform image needs Docker's containerd image store enabled
+docker buildx build ${buildArgs} --tag ubcuas/uasitl:${vehicleType}-${version} --load --platform "linux/amd64,linux/arm64" .

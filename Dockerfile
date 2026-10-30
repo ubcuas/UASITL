@@ -1,8 +1,9 @@
-# UBC UAS SITL (ARM)
+# UBC UAS SITL (multi-arch: linux/amd64, linux/arm64)
 
 ### SITL DOWNLOAD IMAGE ###
 # Run the downloader in a pre-image so SSH keys are dropped from the image
-FROM ubuntu:22.04 AS SITLDOWNLOADER
+# Sources are architecture independent, so clone natively instead of under emulation
+FROM --platform=$BUILDPLATFORM ubuntu:22.04 AS SITLDOWNLOADER
 
 # Need Git to checkout our sources
 RUN apt-get update && apt-get install -y git
@@ -57,6 +58,9 @@ RUN git checkout $ARDUPILOT_REF \
 ### SITL BUILD IMAGE ###
 FROM ubuntu:22.04 AS SITLBUILD
 
+# Set automatically by buildx (amd64, arm64)
+ARG TARGETARCH
+
 # Trick to get apt-get to not prompt for timezone in tzdata
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -67,12 +71,20 @@ ARG USER_GID=1000
 RUN groupadd ${USER_NAME} --gid ${USER_GID}\
     && useradd -l -m ${USER_NAME} -u ${USER_UID} -g ${USER_GID} -s /bin/bash
 
-# Need sudo and lsb-release for the installation prerequisites
-RUN apt-get update && apt-get install --no-install-recommends -y sudo lsb-release tzdata bc screen
-RUN cp /etc/apt/sources.list /etc/apt/sources.list~ && \
+# Need sudo, lsb-release, tzdata, and bash-completion for the installation prerequisites
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    lsb-release \
+    sudo \
+    tzdata \
+    bash-completion
+
+# No pygame wheels on ARM, so pull in what's needed to build it from source
+RUN [ "$TARGETARCH" = "amd64" ] || \
+    ( \
     sed -Ei 's/^# deb-src /deb-src /' /etc/apt/sources.list && \
-    apt-get update
-RUN apt-get build-dep -y python3-pygame
+    apt-get update && \
+    apt-get build-dep -y python3-pygame \
+    )
 
 # Pull in ardupilot and build the vehicle
 COPY --from=SITLDOWNLOADER /ardupilot /vehicle
@@ -87,7 +99,8 @@ RUN echo "vehicle ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USER_NAME} \
 
 USER ${USER_NAME}
 
-ENV SKIP_AP_EXT_ENV=1 SKIP_AP_GRAPHIC_ENV=1 SKIP_AP_COV_ENV=1 SKIP_AP_GIT_CHECK=1
+# DO_AP_STM_ENV=0 skips the STM32 flight controller toolchain; SITL doesn't need it
+ENV SKIP_AP_EXT_ENV=1 SKIP_AP_GRAPHIC_ENV=1 SKIP_AP_COV_ENV=1 SKIP_AP_GIT_CHECK=1 DO_AP_STM_ENV=0
 # Install all prerequisites now
 RUN Tools/environment_install/install-prereqs-ubuntu.sh -y
 
@@ -108,15 +121,24 @@ RUN ./waf distclean \
 ### SITL RUN IMAGE ###
 FROM ubuntu:22.04 AS SITLRUN
 
-# Runtime dependencies
+# Set automatically by buildx (amd64, arm64)
+ARG TARGETARCH
+
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y python3 python3-pip python-is-python3 python3-numpy bc screen
-# Provide sources list for build dependencies
-RUN cp /etc/apt/sources.list /etc/apt/sources.list~ && \
-    sed -Ei 's/^# deb-src /deb-src /' /etc/apt/sources.list && \
-    apt-get update
-RUN apt-get build-dep python3-lxml -y
-RUN pip install --no-cache-dir --user -U future lxml pymavlink MAVProxy pexpect
+
+# Runtime dependencies
+RUN apt-get update && apt-get install --no-install-recommends -y python3 python3-pip python-is-python3 python3-numpy bc screen \
+    # No lxml wheels on ARM, so pull in what's needed to build it from source
+    && ( [ "$TARGETARCH" = "amd64" ] || \
+        ( \
+        sed -Ei 's/^# deb-src /deb-src /' /etc/apt/sources.list && \
+        apt-get update && \
+        apt-get build-dep -y python3-lxml \
+        ) \
+    ) \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir --user -U future lxml pymavlink MAVProxy pexpect
 
 # Take in a parameter for the vehicle type
 ARG VEHICLE_TYPE
@@ -137,7 +159,7 @@ COPY --from=SITLBUILD /vehicle/Tools/autotest /vehicle/Tools/autotest
 COPY --from=SITLBUILD /vehicle/$VEHICLE /vehicle/$VEHICLE
 COPY --from=SITLBUILD /vehicle/build/sitl/bin/$VEHICLE_LOWER /vehicle/build/sitl/bin/$VEHICLE_LOWER
 
-COPY $VEHICLE_PARAM /${VEHICLE}/Tools/autotest/default_params/$VEHICLE_PARAM
+COPY lib/$VEHICLE_PARAM /${VEHICLE}/Tools/autotest/default_params/$VEHICLE_PARAM
 
 # TCP 5760 is what the sim exposes by default, each INSTANCE increments by 10
 EXPOSE 5760-7760
@@ -155,11 +177,12 @@ ENV NUMVEHICLES 1
 ENV INCREMENTSTEPLAT 0.01
 ENV INCREMENTSTEPLON 0.01
 # Default to no custom parameter file
-ENV PARAM_FILE "" 
+ENV PARAM_FILE ""
 
 # Entrypoint
-COPY startArdupilotSITL.sh /
-# Give execute permissions
-RUN chmod +x /startArdupilotSITL.sh
+COPY lib/startArdupilotSITL.sh /
+# Strip any Windows line endings and give execute permissions
+RUN sed -i 's/\r$//' /startArdupilotSITL.sh \
+    && chmod +x /startArdupilotSITL.sh
 
-ENTRYPOINT /startArdupilotSITL.sh ${NUMVEHICLES} ${LAT} ${LON} ${ALT} ${DIR} ${INCREMENTSTEPLAT} ${INCREMENTSTEPLON} ${VEHICLE} ${VEHICLEMODEL} ${SPEEDUP}  ${PARAM_FILE}
+ENTRYPOINT /startArdupilotSITL.sh ${NUMVEHICLES} ${LAT} ${LON} ${ALT} ${DIR} ${INCREMENTSTEPLAT} ${INCREMENTSTEPLON} ${VEHICLE} ${VEHICLEMODEL} ${SPEEDUP} ${PARAM_FILE}
