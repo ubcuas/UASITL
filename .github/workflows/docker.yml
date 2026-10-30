@@ -65,6 +65,10 @@ jobs:
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
+      with:
+        # binfmt:latest (qemu v10.2.3) segfaults in ldconfig during arm64 apt installs
+        image: tonistiigi/binfmt:qemu-v9.2.2
+        platforms: arm64
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
